@@ -2,7 +2,16 @@
 const CACHE = 'latzod-v1';
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest'])));
+  e.waitUntil(
+    (async () => {
+      const c = await caches.open(CACHE);
+      await c.addAll(['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png']);
+      // קבצי הבנייה (JS ו-CSS) שהדף טוען, כדי שהאפליקציה תעבוד בלי אינטרנט כבר אחרי הביקור הראשון
+      const html = await (await c.match('./index.html')).text();
+      const assets = [...html.matchAll(/(?:src|href)="\.?\/?(assets\/[^"]+)"/g)].map((m) => './' + m[1]);
+      if (assets.length) await c.addAll(assets);
+    })(),
+  );
   self.skipWaiting();
 });
 
