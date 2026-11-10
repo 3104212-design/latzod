@@ -39,6 +39,6 @@ tar -C dist -czf - . | "${SSH[@]}" "set -e
 
 echo "== בדיקה"
 code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
-sw=$(curl -s "$SITE/sw.js" | grep -o "latzod-[0-9]*" || true)
+sw=$(curl -s "$SITE/sw.js" | grep -oE "latzod-[0-9]+" | head -1 || true)
 echo "$SITE -> $code ($sw)"
 [[ "$code" == "200" ]] || { echo "האתר לא עונה כמו שצריך"; exit 1; }
