@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.DS_Store
+brand-src/preview
+
+# צילומים מקוריים (רק במחשב) ודפי בדיקה שנוצרים מהטיוטות
+brand-src/
+review/
+.claude/

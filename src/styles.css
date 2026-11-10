@@ -1,0 +1,1607 @@
+:root {
+  --hero: #4fae52;
+  --hero-2: #64bb66;
+  --foot: rgba(255, 255, 255, 0.13);
+  --green: #3f9d43;
+  --green-deep: #2b7a30;
+  --green-soft: #e3f1e1;
+  --logo: #4f9a62;
+  --frame: #9fd3a6;
+  --bg: #f3f6f1;
+  --surface: #ffffff;
+  --surface-2: #eef3ec;
+  --text: #1b2a1d;
+  --muted: #5e6e60;
+  --line: #dbe4d8;
+  --warn: #b8503a;
+  --warn-soft: #f8e7e2;
+  --shadow: 0 1px 2px rgba(27, 42, 29, 0.06), 0 4px 16px rgba(27, 42, 29, 0.06);
+  --radius: 18px;
+  --font: 'Heebo Variable', 'Heebo', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --display: 'Secular One', 'Heebo Variable', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --hero: #24622a;
+    --hero-2: #2c7032;
+    --foot: rgba(255, 255, 255, 0.07);
+    --green: #6cc06f;
+    --green-deep: #8fd391;
+    --green-soft: #1d3320;
+  --logo: #7cc58a;
+  --frame: #2f5a35;
+    --bg: #0d140f;
+    --surface: #151f17;
+    --surface-2: #1b281e;
+    --text: #e4eee4;
+    --muted: #9bb09d;
+    --line: #273829;
+    --warn: #e0866f;
+    --warn-soft: #3a211b;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --hero: #24622a;
+  --hero-2: #2c7032;
+  --foot: rgba(255, 255, 255, 0.07);
+  --green: #6cc06f;
+  --green-deep: #8fd391;
+  --green-soft: #1d3320;
+  --logo: #7cc58a;
+  --frame: #2f5a35;
+  --bg: #0d140f;
+  --surface: #151f17;
+  --surface-2: #1b281e;
+  --text: #e4eee4;
+  --muted: #9bb09d;
+  --line: #273829;
+  --warn: #e0866f;
+  --warn-soft: #3a211b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--green-deep);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+/* ---------- סרגל עליון ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  gap: 12px;
+}
+
+.topbar.on-hero {
+  position: relative;
+  justify-content: center;
+  background: var(--hero);
+  color: #fff;
+  padding-top: calc(16px + env(safe-area-inset-top));
+}
+
+/* במסך הבית הכותרת במרכז, כמו על הכריכה, וכפתור העזרה בפינה */
+.topbar.on-hero .sos-btn {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top));
+  inset-inline-end: 16px;
+}
+
+.brand {
+  display: inline-flex;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* כותרת הכריכה (SVG) */
+.title-mark {
+  display: inline-block;
+  line-height: 0;
+  color: inherit;
+}
+
+.title-mark svg {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+
+.title-badge {
+  display: inline-flex;
+  background: var(--hero);
+  color: #fff;
+}
+
+.publisher-logo {
+  display: inline-block;
+  line-height: 0;
+  color: var(--logo);
+}
+
+.publisher-logo svg {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+
+/* פרטי הספר, כמו בגב הסימניה */
+.book-credit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  color: var(--logo);
+}
+
+.publisher-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.credit-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--logo);
+}
+
+.credit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--logo);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.credit-phone {
+  font-size: 22px;
+}
+
+.credit-phone svg {
+  width: 24px;
+  height: 24px;
+}
+
+.credit-email {
+  font-size: 15px;
+}
+
+.book-credit.compact .credit-title {
+  font-size: 15px;
+}
+
+.book-credit.compact .credit-phone {
+  font-size: 17px;
+}
+
+.book-credit.compact .credit-email {
+  font-size: 13px;
+}
+
+.sos-btn {
+  border: 1.5px solid currentColor;
+  background: transparent;
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.topbar:not(.on-hero) .sos-btn {
+  color: var(--warn);
+}
+
+/* ---------- אזור עליון ירוק ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero);
+  color: #fff;
+  padding: 4px 16px 28px;
+  border-radius: 0 0 32px 32px;
+  text-align: center;
+}
+
+.hero > *:not(.feet) {
+  position: relative;
+}
+
+.feet {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.feet svg {
+  position: absolute;
+  fill: var(--foot);
+}
+
+.hero-dates {
+  font-size: 15px;
+  opacity: 0.92;
+}
+
+.hero-dates .heb {
+  display: block;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.hero-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.dial {
+  position: relative;
+  width: min(250px, 64vw);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.dial svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dial-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.dial-num {
+  font-family: var(--display);
+  font-size: 64px;
+}
+
+.dial-of {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.hero-step {
+  font-family: var(--display);
+  font-size: 26px;
+  margin-top: 4px;
+}
+
+.hero-principle {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 15px;
+}
+
+.back-today {
+  display: inline-block;
+  margin-top: 12px;
+  color: #fff;
+  font-size: 15px;
+}
+
+/* ---------- כרטיסים ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 16px 8px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1.5px solid var(--frame);
+}
+
+.card-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--green-deep);
+  margin: 0 0 6px;
+}
+
+.card h2 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.card p {
+  margin: 0 0 10px;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 14px;
+}
+
+.step-text {
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+.reading {
+  white-space: pre-wrap;
+}
+
+.page-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-soft);
+  color: var(--green-deep);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.prayer {
+  font-family: var(--display);
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--green-deep);
+}
+
+/* פתיחת צעד: משפט פתיחה גדול, כמו עמוד הפתיחה של כל צעד בספר */
+.opener {
+  text-align: center;
+  background: var(--green-soft);
+  border-color: transparent;
+}
+
+.motto {
+  font-family: var(--display);
+  font-size: 26px;
+  line-height: 1.35;
+  color: var(--green-deep);
+  margin: 6px 0 12px !important;
+}
+
+/* שאלון להיום: תיבה מוצללת, כמו בדפי הספר */
+.questionnaire {
+  background: var(--surface-2);
+}
+
+.questionnaire textarea {
+  background: var(--surface);
+}
+
+.draft-badge {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px dashed currentColor;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  vertical-align: 1px;
+}
+
+.draft-note {
+  margin-top: 12px !important;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.ref-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ref-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ref-list li:last-child {
+  border-bottom: none;
+}
+
+/* ---------- רק להיום ---------- */
+.commit {
+  text-align: center;
+}
+
+/* בסגנון הסימניה: "צעד N" בירוק, ומתחתיו ההתחייבות באפור */
+.bm-step {
+  color: var(--logo);
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.bm-text {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 30ch;
+  margin: 2px auto 14px !important;
+}
+
+.bookmark {
+  padding: 0;
+  overflow: hidden;
+}
+
+.bookmark summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.bookmark summary::-webkit-details-marker {
+  display: none;
+}
+
+.bookmark summary .chev {
+  margin-inline-start: auto;
+  color: var(--logo);
+  transition: transform 0.2s;
+}
+
+.bookmark[open] summary .chev {
+  transform: rotate(180deg);
+}
+
+.bookmark-list {
+  margin: 0 16px 16px;
+  padding: 6px 12px 12px;
+  border: 1.5px solid var(--frame);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.bookmark-list .bm-step {
+  margin-top: 14px;
+}
+
+.bookmark-list .bm-text {
+  margin-bottom: 0 !important;
+}
+
+.bookmark-list .current .bm-step {
+  font-weight: 800;
+}
+
+.commit-title {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--green-deep);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+}
+
+:root[data-theme='dark'] .btn-primary {
+  color: #0d140f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .btn-primary {
+    color: #0d140f;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--line);
+}
+
+.btn-danger {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.done-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--green-deep);
+  min-height: 48px;
+}
+
+/* ---------- שאלון ---------- */
+.q {
+  margin-bottom: 16px;
+}
+
+.q:last-child {
+  margin-bottom: 0;
+}
+
+.q label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+textarea,
+input[type='text'],
+input[type='tel'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='number'] {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+textarea {
+  min-height: 84px;
+}
+
+textarea:focus,
+input:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.saved-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ---------- ספירת ימים נקיים ---------- */
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.counter-num {
+  font-family: var(--display);
+  font-size: 44px;
+  line-height: 1;
+  color: var(--green-deep);
+}
+
+.counter-sub {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ---------- ניווט תחתון ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  inset-inline: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 20;
+}
+
+.bottom-nav ul {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 10px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bottom-nav a[aria-current='page'] {
+  color: var(--green-deep);
+}
+
+.bottom-nav svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* ---------- מסך כותרת פשוט ---------- */
+.page-head {
+  padding: 8px 16px 4px;
+}
+
+.page-head h1 {
+  font-size: 32px;
+  color: var(--green-deep);
+}
+
+.page-head p {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
+/* ---------- המסלול ---------- */
+.trail {
+  position: relative;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trail::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  inset-inline-start: 39px;
+  border-inline-start: 3px dotted var(--line);
+}
+
+.trail-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.trail-node {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--muted);
+  z-index: 1;
+}
+
+.trail-item.current .trail-node {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 0 6px var(--green-soft);
+}
+
+.trail-item.complete .trail-node {
+  background: var(--green-soft);
+  border-color: var(--green);
+  color: var(--green-deep);
+}
+
+.trail-card {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+.trail-item.current .trail-card {
+  border-color: var(--green);
+}
+
+.trail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.trail-month {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.trail-name {
+  font-family: var(--display);
+  font-size: 19px;
+}
+
+.trail-principle {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.bar {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  border-radius: 99px;
+}
+
+/* ---------- רשת ימים ---------- */
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.day-cell {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 2px solid transparent;
+}
+
+.day-cell.done {
+  background: var(--green);
+  color: #fff;
+}
+
+.day-cell.checked {
+  border-color: var(--green);
+}
+
+.day-cell.today {
+  outline: 3px solid var(--green-deep);
+  outline-offset: 2px;
+}
+
+.day-cell.future {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+.legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  margin-inline-end: 6px;
+  vertical-align: -1px;
+}
+
+/* ---------- יומן ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.stat {
+  text-align: center;
+  padding: 14px 6px;
+}
+
+.stat b {
+  display: block;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 30px;
+  color: var(--green-deep);
+  line-height: 1.1;
+}
+
+.stat span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.entry {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.entry-date {
+  font-weight: 700;
+}
+
+.entry-meta {
+  font-size: 14px;
+  color: var(--green-deep);
+}
+
+.entry-text {
+  margin-top: 6px;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- הגדרות ---------- */
+.field {
+  margin-bottom: 14px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.choice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.choice:has(input:checked) {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
+.choice input {
+  margin-top: 6px;
+  accent-color: var(--green);
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.choice b {
+  display: block;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--green);
+  flex: none;
+}
+
+/* ---------- חלון עזרה ---------- */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 12, 0.5);
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 92dvh;
+  overflow: auto;
+  background: var(--bg);
+  border-radius: 26px 26px 0 0;
+  padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sheet-head h2 {
+  font-size: 26px;
+  color: var(--green-deep);
+}
+
+.close-btn {
+  border: none;
+  background: var(--surface-2);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.call {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.call b {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--green-deep);
+}
+
+.breath {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 8px auto 12px;
+  background: var(--green-soft);
+  border: 3px solid var(--green);
+  animation: breathe 10s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.7);
+  }
+  40%,
+  60% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breath {
+    animation: none;
+  }
+}
+
+/* ---------- פתיחה ---------- */
+.onb {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.onb-hero {
+  padding-top: calc(28px + env(safe-area-inset-top));
+}
+
+.onb-hero .dial {
+  width: min(300px, 78vw);
+  margin-bottom: 10px;
+}
+
+.book-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.book-card-sub {
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--green-deep);
+  line-height: 1.5;
+}
+
+.book-card-sub .muted {
+  font-family: var(--font);
+}
+
+.onb-credit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--logo);
+}
+
+.onb-slogan {
+  font-family: var(--display);
+  font-size: 22px;
+}
+
+.onb-sub {
+  font-size: 15px;
+  opacity: 0.92;
+  margin-top: 6px;
+}
+
+.onb-body {
+  padding: 20px 16px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.dots i.on {
+  background: var(--green);
+  width: 22px;
+  border-radius: 99px;
+}
+
+.editor-q {
+  margin-bottom: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- ספירה (בהשראת I Am Sober) ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1.5px solid var(--frame);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chip.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.chip.add {
+  border-style: dashed;
+  color: var(--logo);
+}
+
+.tracker-tabs {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 2px;
+}
+
+.tracker-tabs .chip {
+  flex: none;
+}
+
+.counter-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero);
+  color: #fff;
+  border-radius: 24px;
+  padding: 16px 16px 20px;
+  text-align: center;
+}
+
+.counter-hero > *:not(.feet) {
+  position: relative;
+}
+
+.counter-name {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 2px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.clock {
+  font-family: var(--display);
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-since {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+button.stat {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stat b {
+  font-size: 24px;
+  word-break: break-word;
+}
+
+.next-ms {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.next-ms h2 {
+  margin: 0;
+}
+
+.bar.big {
+  height: 12px;
+}
+
+.badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 8px;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.badge svg {
+  width: 56px;
+  height: 56px;
+  stroke: var(--line);
+}
+
+.badge svg circle {
+  fill: var(--surface-2);
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.badge.got svg {
+  stroke: var(--green);
+}
+
+.badge.got svg circle {
+  fill: var(--green);
+  stroke: var(--green);
+  stroke-dasharray: none;
+}
+
+.badge-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.badge.got .badge-label {
+  color: var(--green-deep);
+}
+
+.actions-row .btn {
+  flex: 1;
+  padding-inline: 10px;
+}
+
+.warn-note {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 0 0 14px !important;
+}
+
+.reasons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.reason {
+  position: relative;
+  border: 1.5px solid var(--frame);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.reason img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.reason p {
+  margin: 0 !important;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.reason-del {
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 13px;
+}
+
+.reason-preview {
+  display: block;
+  max-width: 160px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.reason-today {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.reason-today img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  flex: none;
+}
+
+.reason-today-text {
+  display: block;
+  font-family: var(--display);
+  font-size: 19px;
+  color: var(--green-deep);
+}
+
+.summary-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.summary-empty > span[aria-hidden] {
+  color: var(--logo);
+  font-size: 24px;
+}
+
+.tracker-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* סיכום היום */
+.choice-btn {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1.5px solid var(--frame);
+}
+
+.choice-btn.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.choice-btn.on.warn {
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
+.moods {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.mood {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: 1.5px solid var(--frame);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 8px 2px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.mood small {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.mood.on {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--green);
+}
+
+.review-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.pill.ok {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  border-color: transparent;
+}
+
+.pill.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: transparent;
+}
+
+/* תובנות */
+.section-title {
+  font-weight: 700;
+  margin: 8px 2px 0;
+}
+
+.mood-strip {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 4px;
+}
+
+.mood-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  text-decoration: none;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.mood-cell.m1 { background: #f3c4b8; }
+.mood-cell.m2 { background: #f6dcb4; }
+.mood-cell.m3 { background: #eee9b9; }
+.mood-cell.m4 { background: #c9e8c3; }
+.mood-cell.m5 { background: #9fd8a3; }
+
+.mood-cell.slip {
+  outline: 2px solid var(--warn);
+  outline-offset: -2px;
+}
+
+.hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hbar {
+  display: grid;
+  grid-template-columns: 96px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.hbar .bar {
+  margin: 0;
+}
+
+.hbar b {
+  text-align: end;
+  color: var(--green-deep);
+}
+
+@media (max-width: 360px) {
+  .badges {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bottom-nav a {
+    font-size: 12px;
+  }
+}
