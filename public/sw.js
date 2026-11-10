@@ -17,7 +17,10 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
+    // מוחקים רק מטמונים ישנים של האפליקציה הזו. ב-github.io כמה אתרים חולקים את אותו מקור
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('latzod-') && k !== CACHE).map((k) => caches.delete(k)))),
   );
   self.clients.claim();
 });
