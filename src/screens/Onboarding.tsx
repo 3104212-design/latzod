@@ -15,6 +15,7 @@ export function Onboarding() {
   const [startDate, setStartDate] = useState(todayISO());
   const [cleanSince, setCleanSince] = useState('');
   const [cleanName, setCleanName] = useState('');
+  const [name, setName] = useState('');
   const month = new Date().getMonth();
 
   const finish = () => {
@@ -25,6 +26,8 @@ export function Onboarding() {
       joinedAt: s.joinedAt ?? todayISO(),
       mode,
       startDate: mode === 'personal' ? startDate : s.startDate,
+      name: name.trim() || s.name,
+      lastSeen: todayISO(),
     }));
     // דרך saveTracker, כמו בכל ספירה חדשה: אבני דרך שכבר עברו לא נחגגות בדיעבד
     if (cleanSince) {
@@ -131,6 +134,12 @@ export function Onboarding() {
 
         {stage === 2 && (
           <>
+            <div className="card">
+              <div className="field">
+                <label htmlFor="onb-name">איך לקרוא לך? (לא חובה)</label>
+                <input id="onb-name" type="text" autoComplete="given-name" maxLength={24} value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+            </div>
             <div className="card">
               <div className="field">
                 <label htmlFor="onb-clean">ספירת ימים נקיים (לא חובה)</label>

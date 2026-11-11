@@ -1,0 +1,606 @@
+/* ===== גרסה 2.1: הצעידה היומית, עקבות, השבוע שלי, טוב שחזרת ===== */
+
+/* החלון של הצעידה מוגדל יחד עם שאר האפליקציה כשבוחרים טקסט גדול */
+:root[data-size='large'] .walk {
+  zoom: 1.12;
+}
+
+:root[data-size='xlarge'] .walk {
+  zoom: 1.25;
+}
+
+/* ---------- הכפתור בראש מסך היום ---------- */
+.walk-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 16px;
+  padding: 8px 22px 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f5f24;
+  font-weight: 800;
+  font-size: 17px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+  animation: cta-breathe 3.2s ease-in-out infinite;
+}
+
+.walk-cta:active {
+  transform: scale(0.97);
+}
+
+.walk-cta-foot {
+  width: 14px;
+  height: 30px;
+  color: var(--hero);
+  flex: none;
+}
+
+:root[data-theme='dark'] .walk-cta {
+  background: #e9f5e7;
+  color: #143d18;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .walk-cta {
+    background: #e9f5e7;
+    color: #143d18;
+  }
+}
+
+@keyframes cta-breathe {
+  0%,
+  100% {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), 0 0 0 0 rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16), 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+}
+
+/* ---------- סדר היום: עקבות במקום עיגולים ---------- */
+.flow-foot {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 34px;
+  color: var(--frame);
+  transition: color 0.25s, transform 0.25s;
+}
+
+.flow-foot svg {
+  width: 15px;
+  height: 32px;
+}
+
+/* ימין ושמאל לסירוגין, כמו הליכה */
+.flow-foot.alt {
+  transform: translateY(-4px);
+}
+
+.flow-step.next .flow-foot {
+  color: var(--green);
+  opacity: 0.55;
+}
+
+.flow-step.done .flow-foot {
+  color: var(--green);
+  opacity: 1;
+}
+
+/* ---------- הצעידה: מסך מלא ---------- */
+.walk {
+  position: fixed;
+  inset: 0;
+  /* מעל התפריט, מתחת לנעילה (48) ולחלונות (50), כדי ש"עזרה עכשיו" והנעילה יופיעו מעליה */
+  z-index: 46;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  animation: fade-in 0.25s ease;
+}
+
+.walk-top {
+  position: relative;
+  background: var(--hero);
+  color: #fff;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 14px;
+  border-radius: 0 0 26px 26px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.walk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.walk-stage-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.walk-trail {
+  list-style: none;
+  margin: 6px auto 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.walk-foot {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: none;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.3s;
+}
+
+.walk-foot svg {
+  width: 18px;
+  height: 38px;
+}
+
+.walk-foot.alt {
+  margin-bottom: 10px;
+}
+
+.walk-foot.done {
+  color: #fff;
+}
+
+.walk-foot.cur {
+  background: rgba(0, 0, 0, 0.14);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.walk-foot.cur.done {
+  color: #fff;
+}
+
+/* חותמת: העקבה נלחצת לאדמה כשהצעד נעשה */
+.walk-foot.just svg {
+  animation: stamp 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+@keyframes stamp {
+  0% {
+    transform: scale(1.7);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.walk-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.walk-stage {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 22px 18px 12px;
+  animation: walk-in 0.35s ease;
+}
+
+@keyframes walk-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.walk-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 1.3;
+  color: var(--green-deep);
+  margin: 0 0 12px;
+  outline: none;
+}
+
+.walk-kicker {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.walk-big {
+  font-family: var(--display);
+  font-size: 24px;
+  line-height: 1.5;
+  margin: 8px 0 14px;
+}
+
+.walk-prayer {
+  color: var(--green-deep);
+  text-align: center;
+  padding: 18px 8px;
+}
+
+.walk-reading {
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.walk-textarea {
+  width: 100%;
+  min-height: 34vh;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.walk-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.walk-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--line);
+  transition: width 0.25s, background 0.25s;
+}
+
+.walk-dots i.filled {
+  background: var(--green);
+}
+
+.walk-dots i.on {
+  width: 22px;
+  background: var(--green-deep);
+}
+
+.walk-note {
+  background: var(--green-soft);
+  color: var(--green-deep);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.walk-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.walk-next {
+  flex: 1;
+  min-height: 54px;
+  font-size: 18px;
+}
+
+.walk-back {
+  flex: none;
+  width: 54px;
+  min-height: 54px;
+  padding: 0;
+  font-size: 22px;
+}
+
+/* ---------- סיום הצעידה ---------- */
+.walk-end {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 26px 18px 22px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1.5px solid var(--frame);
+}
+
+.walk-end.all {
+  background: var(--hero);
+  border-color: transparent;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.walk-end.all .walk-title {
+  color: #fff;
+}
+
+.walk-end > *:not(.particles) {
+  position: relative;
+}
+
+.walk-end-feet {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--frame);
+}
+
+.walk-end.all .walk-end-feet {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.walk-end-feet span {
+  display: grid;
+  width: 22px;
+}
+
+.walk-end-feet span:nth-child(even) {
+  margin-bottom: 12px;
+}
+
+.walk-end-feet svg {
+  width: 22px;
+  height: 46px;
+}
+
+.walk-end-feet span.done {
+  color: var(--green);
+  animation: stamp 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.4) backwards;
+}
+
+.walk-end.all .walk-end-feet span.done {
+  color: #fff;
+}
+
+.walk-end-stats {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.walk-end-stats div {
+  min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--surface-2);
+}
+
+.walk-end.all .walk-end-stats div {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.walk-end-stats b {
+  display: block;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.walk-end-stats span {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.walk-end-motto {
+  margin: 18px 0 0;
+  font-family: var(--display);
+  font-size: 20px;
+}
+
+/* ---------- טוב שחזרת ---------- */
+.welcome-back {
+  background: var(--green-soft);
+  border-color: transparent;
+}
+
+.welcome-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.welcome-head .card-label {
+  font-size: 17px;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.welcome-back p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- השבוע שלי ---------- */
+.week-ready {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+}
+
+.week-ready-main {
+  flex: 1;
+  display: block;
+  text-align: start;
+  border: none;
+  background: none;
+  padding: 8px 6px;
+  min-height: var(--tap);
+  border-radius: 12px;
+}
+
+.week-ready-main .card-label {
+  display: block;
+}
+
+.week-ready-text {
+  font-weight: 600;
+}
+
+.week-open {
+  display: block;
+  width: 100%;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+}
+
+.week-open-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--green-deep);
+  font-weight: 700;
+}
+
+.week-strip {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.week-foot {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  color: var(--line);
+}
+
+.week-day:nth-child(even) .week-foot {
+  transform: translateY(-4px);
+}
+
+.week-foot svg {
+  width: 14px;
+  height: 30px;
+}
+
+.week-day.done .week-foot {
+  color: var(--green);
+}
+
+.week-day.checked .week-foot {
+  color: var(--green);
+  opacity: 0.45;
+}
+
+.week-day.future .week-foot {
+  opacity: 0.4;
+}
+
+.week-letter {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.week-range {
+  font-weight: 700;
+}
+
+.icon-btn.soft {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.week-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.week-legend .lg {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  vertical-align: middle;
+}
+
+.week-legend .lg.checked {
+  opacity: 0.45;
+}
+
+.week-facts p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.week-facts p + p {
+  border-top: 1px solid var(--line);
+}
+
+.week-facts p > span:first-child {
+  width: 28px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--green-deep);
+  flex: none;
+}
+
+.week-closing {
+  text-align: center;
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--green-deep);
+  margin: 4px 0 8px;
+}
+
+/* ---------- הפחתת תנועה ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .walk,
+  .walk-cta,
+  .walk-stage,
+  .walk-foot.just svg,
+  .walk-end-feet span.done {
+    animation: none !important;
+  }
+  .walk-cta:active {
+    transform: none;
+  }
+}

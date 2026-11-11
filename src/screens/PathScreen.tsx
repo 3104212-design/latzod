@@ -52,8 +52,10 @@ export function PathScreen({ onSos }: { onSos: () => void }) {
         </details>
       </div>
       <div className="trail">
-        {STEPS.map((step) => {
-          const dates = stepDates(step.number, today, track(s));
+        {/* לפי סדר הזמן במסלול האישי: הסבב מתחיל בחודש ההצטרפות, ולא תמיד בינואר */}
+        {STEPS.map((step) => ({ step, dates: stepDates(step.number, today, track(s)) }))
+          .sort((a, b) => (a.dates[0] < b.dates[0] ? -1 : 1))
+          .map(({ step, dates }) => {
           const done = dates.filter((d) => s.days[d]?.done).length;
           const isCur = cur?.step === step.number;
           const complete = done === dates.length;

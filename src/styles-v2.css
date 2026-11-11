@@ -3,6 +3,14 @@
    ====================================================================== */
 
 /* ---------- גודל טקסט ---------- */
+:root[data-size='large'] {
+  --zoom: 1.12;
+}
+
+:root[data-size='xlarge'] {
+  --zoom: 1.25;
+}
+
 :root[data-size='large'] .app,
 :root[data-size='large'] .lock-screen,
 :root[data-size='large'] .sheet-backdrop {

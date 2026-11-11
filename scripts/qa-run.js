@@ -84,6 +84,11 @@ const ROUTES = [
   { hash: '#/clean', click: '.stats > button:nth-child(2)' },
   { hash: '#/more', clickText: 'הגדרת קוד' },
   { hash: '#/journal', search: 'בכנות' },
+  { hash: '#/journal', click: '.week-open' },
+  { hash: '#/', click: '.walk-cta' },
+  { hash: '#/', walk: 2 },
+  { hash: '#/', walk: 4 },
+  { hash: '#/', walk: 4, then: '.walk-actions .btn-ghost' },
   { hash: '#/', celebrate: true },
 ];
 
@@ -95,6 +100,7 @@ function dayHash(n) {
 
 async function closeSheets() {
   document.querySelector('.celebrate-big')?.click();
+  document.querySelector('.walk .icon-btn')?.click();
   for (let i = 0; i < 3 && document.querySelector('.sheet-backdrop'); i++) {
     document.querySelector('.close-btn')?.click();
     await sleep(150);
@@ -117,6 +123,15 @@ export async function runAll({ size } = {}) {
       window.scrollTo(0, 0);
       if (r.open) document.querySelector(r.open)?.setAttribute('open', '');
       if (r.click) document.querySelector(r.click)?.click();
+      if (r.walk != null) {
+        document.querySelector('.walk-cta')?.click();
+        await sleep(150);
+        document.querySelectorAll('.walk-foot')[r.walk]?.click();
+        if (r.then) {
+          await sleep(150);
+          document.querySelector(r.then)?.click();
+        }
+      }
       if (r.clickText) [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === r.clickText)?.click();
       if (r.search) {
         const inp = document.querySelector('.search input');
@@ -125,7 +140,7 @@ export async function runAll({ size } = {}) {
       }
       if (r.celebrate) (await import('/src/lib/feedback.ts')).celebrate({ size: 'big', title: 'שבוע נקי מהימורים מקוונים!', text: 'צעד אחר צעד.', share: () => {} });
       await sleep(250);
-      const label = `${theme} ${r.hash}${r.open ? ' ' + r.open : ''}${r.click ? ' ' + r.click : ''}${r.clickText ? ' ' + r.clickText : ''}${r.search ? ' search' : ''}${r.celebrate ? ' celebrate' : ''}`;
+      const label = `${theme} ${r.hash}${r.open ? ' ' + r.open : ''}${r.click ? ' ' + r.click : ''}${r.clickText ? ' ' + r.clickText : ''}${r.search ? ' search' : ''}${r.celebrate ? ' celebrate' : ''}${r.walk != null ? ' walk' + r.walk + (r.then ? ' end' : '') : ''}`;
       const found = audit();
       if (found.length) out[label] = found;
     }

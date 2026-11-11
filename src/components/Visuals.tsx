@@ -13,6 +13,16 @@ function Footprint({ style, flip }: { style: CSSProperties; flip?: boolean }) {
   );
 }
 
+/** עקבה קטנה אחת (סמל), בצבע הטקסט. flip: הרגל השנייה */
+export function FootIcon({ flip, className }: { flip?: boolean; className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 120 260" aria-hidden="true" style={flip ? { transform: 'scaleX(-1)' } : undefined}>
+      <path fill="currentColor" d="M60 0C96 0 118 30 118 74c0 38-14 64-18 86H20C16 138 2 112 2 74 2 30 24 0 60 0Z" />
+      <rect fill="currentColor" x="18" y="174" width="84" height="66" rx="26" />
+    </svg>
+  );
+}
+
 /** עקבות גדולות ברקע האזור הירוק */
 export function Feet() {
   return (

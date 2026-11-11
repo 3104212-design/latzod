@@ -8,43 +8,19 @@ import { Dial, Feet } from '../components/Visuals';
 import { ContentEditor } from './ContentEditor';
 import { addDays, formatHebrew, formatLong, fromISO, todayISO, type ISODate } from '../lib/dates';
 import { positionFor, resolveDay, stepDates } from '../lib/program';
-import { go } from '../lib/router';
-import { trackOf, updateDay, useAppState, type DayRecord } from '../lib/store';
-import { useRef } from 'react';
+import { go, replaceRoute } from '../lib/router';
+import { trackOf, useAppState, type DayRecord } from '../lib/store';
+import { useEffect, useRef, useState } from 'react';
 import { InstallCard } from '../components/Install';
-import { flowState, TodayFlow } from '../components/TodayFlow';
+import { TodayFlow } from '../components/TodayFlow';
+import { DailyWalk } from '../components/DailyWalk';
+import { WelcomeBack } from '../components/WelcomeBack';
+import { WeekReadyCard, WeekSheet } from '../components/WeekSummary';
+import { FootIcon } from '../components/Visuals';
+import { FLOW, flowState, greeting, nextFlowIndex, updateWithFlow } from '../lib/day';
 import { celebrate, haptic } from '../lib/feedback';
 
-function greeting(h = new Date().getHours()) {
-  if (h >= 5 && h < 12) return 'בוקר טוב';
-  if (h >= 12 && h < 17) return 'צהריים טובים';
-  if (h >= 17 && h < 22) return 'ערב טוב';
-  return 'לילה טוב';
-}
-
-/**
- * עדכון יום. "הושלם" נקבע לפי חמשת הצעדים: כשכולם נעשו היום מסומן כהושלם (וחוגגים),
- * וכשמבטלים צעד, הסימון יורד. ימים שסומנו ידנית בגרסאות קודמות נשארים כמו שהם.
- */
-function updateWithFlow(date: ISODate, patch: (d: DayRecord) => DayRecord, celebrateDone: boolean): boolean {
-  let completed = false;
-  updateDay(date, (d) => {
-    const next = patch(d);
-    const all = flowState(next).every(Boolean);
-    if (all && !d.done) {
-      completed = true;
-      return { ...next, done: true, doneBy: 'flow' };
-    }
-    if (!all && d.done && d.doneBy === 'flow') return { ...next, done: false, doneBy: undefined };
-    return next;
-  });
-  if (completed && celebrateDone) {
-    celebrate({ size: 'big', title: 'היום הושלם!', text: 'התחייבות, קריאה, שאלון, תפילה וסיכום. צעד שלם בדרך. רק להיום.' });
-  }
-  return completed;
-}
-
-export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
+export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () => void; autoWalk?: boolean }) {
   const s = useAppState();
   const today = todayISO();
   const isToday = date === today;
@@ -57,6 +33,12 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
   const dayHref = (d: ISODate) => (d === today ? '#/' : `#/day/${d}`);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const dateInput = useRef<HTMLInputElement>(null);
+  const [walk, setWalk] = useState(!!autoWalk);
+  // #/walk הופך ל-#/ מיד, כדי שרענון או "חזרה" לא יפתחו את הצעידה שוב
+  useEffect(() => {
+    if (autoWalk) replaceRoute('#/');
+  }, [autoWalk]);
+  const [week, setWeek] = useState(false);
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
     touch.current = { x: t.clientX, y: t.clientY };
@@ -77,7 +59,7 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
 
   const dates = (
     <div className="hero-dates">
-      {isToday && <span className="greeting">{greeting()}</span>}
+      {isToday && <span className="greeting">{greeting(s.name)}</span>}
       {/* שדה התאריך שקוף ומונח מעל הטקסט: לחיצה פותחת את בורר התאריך של המכשיר, גם באייפון */}
       <span className="date-jump-wrap">
         <span className="date-jump" aria-hidden="true">
@@ -168,6 +150,7 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
         </div>
         <h1 className="hero-step">{content.step.name}</h1>
         <span className="hero-principle">{content.step.principle}</span>
+        {isToday && <WalkCta rec={rec} onOpen={() => setWalk(true)} />}
         {!isToday && (
           <div>
             <a className="back-today" href="#/">
@@ -178,6 +161,9 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
       </section>
 
       <div className="stack">
+        {isToday && <WelcomeBack />}
+        {isToday && <WeekReadyCard onOpen={() => setWeek(true)} />}
+
         <div className="card commit" id="sec-pledge">
           <div className="commit-title">רק להיום · 24 שעות</div>
           <p className="bm-text">{content.step.commitment}</p>
@@ -320,7 +306,26 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
           <ContentEditor key={pos.key} contentKey={pos.key} label={`${content.step.name}, יום ${pos.day}`} />
         )}
       </div>
+      {walk && <DailyWalk date={date} onSos={onSos} onClose={() => setWalk(false)} />}
+      {week && <WeekSheet initialOffset={-1} onClose={() => setWeek(false)} />}
     </>
+  );
+}
+
+/** הכפתור בראש מסך היום: מתחיל את הצעידה, או ממשיך מהצעד הבא. כשהכל נעשה, הוא נעלם */
+function WalkCta({ rec, onOpen }: { rec: DayRecord; onOpen: () => void }) {
+  const next = nextFlowIndex(rec);
+  if (next >= FLOW.length) return null;
+  const started = flowState(rec).some(Boolean);
+  const label = !started ? 'לצעוד לתוך היום' : next === 4 ? 'לסיכום הערב' : `להמשיך לצעוד · ${FLOW[next].label}`;
+  return (
+    <div>
+      <button className="walk-cta" onClick={onOpen}>
+        <FootIcon className="walk-cta-foot" />
+        {label}
+        <span aria-hidden="true">‹</span>
+      </button>
+    </div>
   );
 }
 

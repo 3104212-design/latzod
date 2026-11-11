@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { getStep } from '../content/steps';
 import { TopBar } from '../components/Chrome';
 import { Insights } from '../components/Insights';
+import { WeekSheet, weekStart, weekStats, WeekStrip } from '../components/WeekSummary';
 import { formatHebrew, formatLong, todayISO } from '../lib/dates';
 import { positionFor } from '../lib/program';
 import { daysLabel, MOODS } from '../lib/sobriety';
@@ -30,6 +31,8 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
   const today = todayISO();
   const [q, setQ] = useState('');
   const [limit, setLimit] = useState(PAGE);
+  const [week, setWeek] = useState(false);
+  const thisWeek = weekStats(s, weekStart(today), today);
   const query = q.trim();
 
   const entries = useMemo(() => {
@@ -56,6 +59,14 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
         <p>התמונה לאורך זמן, וכל מה שנכתב. נשמר רק במכשיר הזה.</p>
       </div>
       <div className="stack">
+        <button className="card week-open" onClick={() => setWeek(true)}>
+          <span className="week-open-head">
+            <span className="card-label">השבוע שלי</span>
+            <span className="small">לסיכום השבוע ›</span>
+          </span>
+          <WeekStrip w={thisWeek} />
+        </button>
+
         <Insights />
 
         <p className="section-title">רשומות היומן</p>
@@ -133,6 +144,7 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
           </>
         )}
       </div>
+      {week && <WeekSheet onClose={() => setWeek(false)} />}
     </>
   );
 }

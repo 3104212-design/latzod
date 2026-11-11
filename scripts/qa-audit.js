@@ -126,11 +126,15 @@ export function audit({ minTap = 40 } = {}) {
 
   // חלונות צפים: חייבים להיות בתוך המסך, ולהיות העליונים בנקודת המרכז שלהם
   const vh = window.innerHeight;
-  for (const sheet of document.querySelectorAll('.sheet, .celebrate-card, .lock-screen')) {
+  for (const sheet of document.querySelectorAll('.sheet, .celebrate-card, .lock-screen, .walk')) {
     const r = sheet.getBoundingClientRect();
     if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) {
       add('חלון מחוץ למסך', sheet, `[top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)}, vh ${vh}]`);
       continue;
+    }
+    // חלון שחורג חלקית: הכותרת או הכפתורים נחתכים (כמו חלונות גבוהים בטקסט גדול)
+    if (!sheet.matches('.lock-screen') && (r.top < -1 || r.bottom > vh + 1)) {
+      add('חלון חורג מהמסך', sheet, `[top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)}, vh ${vh}]`);
     }
     const x = Math.min(Math.max(r.left + r.width / 2, 1), vw - 1);
     const y = Math.min(Math.max(r.top + Math.min(r.height / 2, 40), 1), vh - 1);

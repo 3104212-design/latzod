@@ -5,7 +5,7 @@ import { Sheet } from './Sheet';
 import { celebrate, toast } from '../lib/feedback';
 import { useNow } from '../lib/hooks';
 import { renderShareImage, shareImage } from '../lib/shareImage';
-import { cleanDaysWord, elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
+import { cleanDaysWord, cleanPhrase, elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
 import { setState, useAppState } from '../lib/store';
 import { APP_VERSION, releaseOf, WHATS_NEW } from '../lib/version';
 
@@ -25,11 +25,11 @@ export function MilestoneWatcher() {
         const show = (blob: Blob | null) =>
           celebrate({
             size: 'big',
-            title: `${label} נקיים${named}!`,
+            title: `${cleanPhrase(label)}${named}!`,
             text: 'צעד אחר צעד, יום אחר יום. זה שלך, וזה אמיתי. רק להיום.',
             share: blob
               ? async () => {
-                  const r = await shareImage(blob, `${label} נקיים. רק להיום.`);
+                  const r = await shareImage(blob, `${cleanPhrase(label)}. רק להיום.`);
                   if (r === 'downloaded') toast('התמונה נשמרה במכשיר.');
                 }
               : undefined,

@@ -129,6 +129,20 @@ export function cleanDaysWord(n: number): string {
   return n === 1 ? 'יום נקי' : 'ימים נקיים';
 }
 
+/**
+ * משך עם "נקי" בהתאמה דקדוקית: "שבוע נקי", "שנה נקייה", "24 שעות נקיות", "3 ימים נקיים".
+ * (לפני כן נכתב תמיד "נקיים", גם "שבוע נקיים" ו"שנה נקיים")
+ */
+export function cleanPhrase(label: string): string {
+  const words = label.trim().split(/\s+/);
+  const last = words[words.length - 1];
+  if (words.length === 1 && (last === 'שבוע' || last === 'חודש')) return `${label} נקי`;
+  if (last === 'אחד') return `${label} נקי`;
+  if (last === 'שנה' || last === 'אחת') return `${label} נקייה`;
+  if (['שעות', 'שעתיים', 'שנים', 'שנתיים'].includes(last)) return `${label} נקיות`;
+  return `${label} נקיים`;
+}
+
 export function daysLabel(n: number): string {
   if (n === 1) return 'יום אחד';
   if (n === 2) return 'יומיים';

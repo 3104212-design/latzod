@@ -7,6 +7,7 @@ import { DocumentSync, MilestoneWatcher, WhatsNew } from './components/Watchers'
 import { todayISO } from './lib/dates';
 import { useRoute } from './lib/router';
 import { useAppState } from './lib/store';
+import { noteVisit } from './lib/visits';
 import { CounterScreen } from './screens/CounterScreen';
 import { DayView } from './screens/DayView';
 import { JournalScreen } from './screens/JournalScreen';
@@ -51,6 +52,8 @@ function Shell() {
   const [sos, setSos] = useState(false);
   const openSos = useCallback(() => setSos(true), []);
   const closeSos = useCallback(() => setSos(false), []);
+  // "טוב שחזרת": בודקים בפתיחה ובכל פעם שהיום מתחלף
+  useEffect(() => noteVisit(), [today, s.onboarded]);
 
   if (!s.onboarded) return <Onboarding />;
 
@@ -76,6 +79,11 @@ function Shell() {
       break;
     case 'more':
       screen = <MoreScreen onSos={openSos} />;
+      break;
+    case 'walk':
+      // קיצור הדרך באייקון: מסך היום, והצעידה נפתחת מיד
+      screen = <DayView date={today} onSos={openSos} autoWalk />;
+      key = today;
       break;
     default:
       screen = <DayView date={today} onSos={openSos} />;

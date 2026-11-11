@@ -5,6 +5,7 @@ import '@fontsource/secular-one';
 import './styles.css';
 import './styles-v2.css';
 import './styles-ios.css';
+import './styles-v21.css';
 import { App } from './App';
 import { registerServiceWorker } from './lib/pwa';
 

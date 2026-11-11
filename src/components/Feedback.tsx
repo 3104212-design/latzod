@@ -34,7 +34,7 @@ export function Toasts() {
 
 const COLORS = ['#ffffff', '#c9f1c4', '#ffd76a', '#8fd391', '#f6b3a2'];
 
-function Particles({ count }: { count: number }) {
+export function Particles({ count }: { count: number }) {
   const parts = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {

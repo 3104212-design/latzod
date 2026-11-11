@@ -1,19 +1,8 @@
-// "סדר היום": חמשת הדברים הקטנים של כל יום, עם התקדמות. (לא "המסלול", שהוא 12 הצעדים)
+// "סדר היום": חמשת הדברים הקטנים של כל יום, כעקבות שמתמלאות. (לא "המסלול", שהוא 12 הצעדים)
 
+import { FLOW, flowState } from '../lib/day';
 import type { DayRecord } from '../lib/store';
-
-export const FLOW = [
-  { id: 'sec-pledge', label: 'התחייבות', short: 'התחייבות' },
-  { id: 'sec-read', label: 'קריאה', short: 'קריאה' },
-  { id: 'sec-questions', label: 'שאלון', short: 'שאלון' },
-  { id: 'sec-prayer', label: 'תפילה', short: 'תפילה' },
-  { id: 'sec-review', label: 'סיכום ערב', short: 'סיכום' },
-] as const;
-
-export function flowState(rec: DayRecord): boolean[] {
-  const wrote = (rec.answers ?? []).some((a) => a?.trim()) || !!rec.note?.trim();
-  return [!!rec.checkin, !!rec.read, wrote, !!rec.prayed, !!rec.review];
-}
+import { FootIcon } from './Visuals';
 
 export function TodayFlow({ rec }: { rec: DayRecord }) {
   const st = flowState(rec);
@@ -58,8 +47,9 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
               onClick={() => go(f.id)}
               aria-label={`${f.label}: ${st[i] ? 'נעשה' : 'עוד לא'}`}
             >
-              <span className="flow-dot" aria-hidden="true">
-                {st[i] ? '✓' : i + 1}
+              {/* עקבה לכל צעד, ימין ושמאל לסירוגין, כמו הליכה */}
+              <span className={`flow-foot${i % 2 ? ' alt' : ''}`} aria-hidden="true">
+                <FootIcon flip={i % 2 === 1} />
               </span>
               <span className="flow-label">{f.short}</span>
             </button>

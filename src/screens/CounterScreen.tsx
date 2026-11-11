@@ -14,6 +14,7 @@ import {
   TRIGGERS,
   breakdown,
   cleanDaysWord,
+  cleanPhrase,
   daysLabel,
   durationLabel,
   elapsedMs,
@@ -96,7 +97,7 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
             onEdit={() => setEdit(t)}
             onRestart={() => setRestart(t)}
             onShare={async (blob, days) => {
-              const r = await shareImage(blob, `${daysLabel(days)} נקיים. רק להיום.`);
+              const r = await shareImage(blob, `${cleanPhrase(daysLabel(days))}. רק להיום.`);
               if (r === 'downloaded') toast('התמונה נשמרה במכשיר. אפשר לשלוח אותה לכל מי שתרצו.');
             }}
           />
@@ -148,16 +149,20 @@ function TrackerView({
   const b = breakdown(ms);
   // התמונה מוכנה מראש, כדי שתפריט השיתוף ייפתח ישירות מהלחיצה (אייפון דורש זאת)
   const [shareBlob, setShareBlob] = useState<Blob | null>(null);
+  const [shareFailed, setShareFailed] = useState(false);
+  const shareOpts = {
+    days: b.days,
+    label: cleanDaysWord(b.days),
+    subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
+  };
   useEffect(() => {
     let alive = true;
     setShareBlob(null);
-    renderShareImage({
-      days: b.days,
-      label: cleanDaysWord(b.days),
-      subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
-    })
+    setShareFailed(false);
+    renderShareImage(shareOpts)
       .then((blob) => alive && setShareBlob(blob))
-      .catch(() => {});
+      // אם ההכנה מראש נכשלה, מכינים בלחיצה (בלי תפריט השיתוף באייפון: הקובץ יורד)
+      .catch(() => alive && setShareFailed(true));
     return () => {
       alive = false;
     };
@@ -171,7 +176,7 @@ function TrackerView({
     <>
       <section className="counter-hero">
         <Feet />
-        <Dial total={24} states={ticks} current={b.hours + 1} label={`${daysLabel(b.days)} נקיים`}>
+        <Dial total={24} states={ticks} current={b.hours + 1} label={cleanPhrase(daysLabel(b.days))}>
           <span className="dial-num">{b.days.toLocaleString('he-IL')}</span>
           <span className="dial-of">{cleanDaysWord(b.days)}</span>
         </Dial>
@@ -262,10 +267,16 @@ function TrackerView({
       <div className="row actions-row">
         <button
           className="btn btn-primary"
-          disabled={!shareBlob}
-          onClick={() => shareBlob && onShare(shareBlob, b.days)}
+          disabled={!shareBlob && !shareFailed}
+          onClick={() => {
+            if (shareBlob) onShare(shareBlob, b.days);
+            else if (shareFailed)
+              renderShareImage(shareOpts)
+                .then((blob) => onShare(blob, b.days))
+                .catch(() => toast('לא הצלחנו להכין את התמונה. אפשר לנסות שוב.'));
+          }}
         >
-          {shareBlob ? 'שיתוף תמונה' : 'מכינים תמונה…'}
+          {shareBlob || shareFailed ? 'שיתוף תמונה' : 'מכינים תמונה…'}
         </button>
         <button className="btn btn-ghost" onClick={onEdit}>
           עריכה
@@ -461,7 +472,7 @@ function RestartSheet({ t, onClose, onDone }: { t: Tracker; onClose: () => void;
     <Sheet title="מעידה היא לא סוף הדרך" onClose={onClose}>
       <div className="card">
         <p>
-          {durationLabel(ms)} נקיים לא נמחקים. הם נשמרים ברצפים הקודמים, וכל מה שלמדת בהם נשאר איתך. מתחילים שוב, רק
+          הרצף של {durationLabel(ms)} לא נמחק. הוא נשמר ברצפים הקודמים, וכל מה שלמדת בו נשאר איתך. מתחילים שוב, רק
           להיום.
         </p>
         <p className="muted small">כדאי גם להתקשר עכשיו למישהו מהדרך, ולא להישאר עם זה לבד.</p>

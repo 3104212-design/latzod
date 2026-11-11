@@ -83,6 +83,12 @@ export interface AppState {
   seenVersion?: string;
   /** המשתמש סגר את ההצעה להתקין את האפליקציה */
   installDismissed?: boolean;
+  /** השם לברכה במסך היום (לא חובה) */
+  name?: string;
+  /** היום האחרון שבו האפליקציה נפתחה, ל"טוב שחזרת" */
+  lastSeen?: ISODate;
+  /** תחילת השבוע (יום ראשון) שהסיכום השבועי שלו כבר הוצג */
+  weekSeen?: ISODate;
   days: Record<ISODate, DayRecord>;
   /** תוכן יומי שהוזן במצב עריכה. מפתח: "<צעד>-<יום>" */
   content: Record<string, DayContent>;

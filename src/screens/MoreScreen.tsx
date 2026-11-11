@@ -141,6 +141,14 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
         </section>
 
         <section className="card">
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label htmlFor="my-name" className="card-label">איך לקרוא לך? (לא חובה)</label>
+            <p className="muted small">השם יופיע בברכה במסך היום. נשמר רק במכשיר הזה.</p>
+            <input id="my-name" type="text" autoComplete="given-name" maxLength={24} value={s.name ?? ''} onChange={(e) => patch({ name: e.target.value })} />
+          </div>
+        </section>
+
+        <section className="card">
           <p className="card-label">איש קשר לרגעים קשים</p>
           <p className="muted small">יופיע בלחיצה אחת בחלון "עזרה עכשיו".</p>
           <div className="field">

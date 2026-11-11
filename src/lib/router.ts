@@ -4,6 +4,7 @@ import { useSyncExternalStore } from 'react';
 
 export type Route =
   | { name: 'today' }
+  | { name: 'walk' }
   | { name: 'day'; date: string }
   | { name: 'clean' }
   | { name: 'path' }
@@ -17,6 +18,8 @@ function parse(hash: string): Route {
     case 'day':
       if (parts[1] && /^\d{4}-\d{2}-\d{2}$/.test(parts[1])) return { name: 'day', date: parts[1] };
       break;
+    case 'walk':
+      return { name: 'walk' };
     case 'clean':
       return { name: 'clean' };
     case 'path':
@@ -51,6 +54,13 @@ export function useRoute(): Route {
     },
     () => current,
   );
+}
+
+/** מחליף את הכתובת בלי רשומה חדשה בהיסטוריה ובלי לגלול (למשל #/walk שהופך ל-#/) */
+export function replaceRoute(hash: string) {
+  history.replaceState(history.state, '', hash);
+  current = parse(hash);
+  listeners.forEach((l) => l());
 }
 
 export function go(path: string) {
