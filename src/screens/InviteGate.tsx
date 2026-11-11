@@ -45,9 +45,14 @@ export function InviteGate({ invite }: { invite?: string }) {
     if (!r.ok) setError(r.error);
   };
 
+  // גם כשהקישור נפתח בזמן שהמסך כבר פתוח (רק ה-hash משתנה, בלי טעינה מחדש)
+  const tried = useRef<string | null>(null);
   useEffect(() => {
-    if (invite) enter(invite);
-  }, []);
+    if (invite && tried.current !== invite) {
+      tried.current = invite;
+      enter(invite);
+    }
+  }, [invite]);
 
   return (
     <div className="onb gate">
