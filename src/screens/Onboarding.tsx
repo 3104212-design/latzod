@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { HEBREW_MONTHS, getStep } from '../content/steps';
 import { Dial, Feet } from '../components/Visuals';
 import { PublisherLogo, TitleMark } from '../components/Brand';
-import { todayISO } from '../lib/dates';
-import { setState, type AppState } from '../lib/store';
-import { uid } from '../lib/sobriety';
+import { nowInputValue, todayISO } from '../lib/dates';
+import { saveTracker, setState, type AppState } from '../lib/store';
 import { APP_VERSION } from '../lib/version';
 import type { Mode } from '../lib/program';
 
@@ -26,10 +25,11 @@ export function Onboarding() {
       joinedAt: s.joinedAt ?? todayISO(),
       mode,
       startDate: mode === 'personal' ? startDate : s.startDate,
-      trackers: cleanSince
-        ? [...s.trackers, { id: uid(), name: cleanName.trim() || 'ההתמכרות שלי', since: cleanSince, history: [] }]
-        : s.trackers,
     }));
+    // דרך saveTracker, כמו בכל ספירה חדשה: אבני דרך שכבר עברו לא נחגגות בדיעבד
+    if (cleanSince) {
+      saveTracker({ name: cleanName.trim() || 'ההתמכרות שלי', since: cleanSince > nowInputValue() ? nowInputValue() : cleanSince });
+    }
     location.hash = '#/';
   };
 
@@ -135,7 +135,7 @@ export function Onboarding() {
               <div className="field">
                 <label htmlFor="onb-clean">ספירת ימים נקיים (לא חובה)</label>
                 <p className="muted small">מאיזה רגע לספור? אפשר להשאיר ריק ולהוסיף אחר כך.</p>
-                <input id="onb-clean" type="datetime-local" value={cleanSince} onChange={(e) => setCleanSince(e.target.value)} />
+                <input id="onb-clean" type="datetime-local" value={cleanSince} max={nowInputValue()} onChange={(e) => setCleanSince(e.target.value)} />
               </div>
               {cleanSince && (
                 <div className="field">

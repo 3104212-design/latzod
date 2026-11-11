@@ -1,14 +1,8 @@
 // תקציר הספירות למסך "היום": ימים נקיים ואבן הדרך הבאה, עם קישור למסך הספירה.
 
 import { useNow } from '../lib/hooks';
-import { breakdown, durationLabel, elapsedMs, nextMilestone } from '../lib/sobriety';
+import { breakdown, cleanDaysWord, durationLabel, elapsedMs, nextMilestone } from '../lib/sobriety';
 import { useAppState } from '../lib/store';
-
-export function daysWord(n: number): string {
-  if (n === 1) return 'יום נקי';
-  if (n === 2) return 'יומיים נקיים';
-  return 'ימים נקיים';
-}
 
 export function TrackerSummary() {
   const s = useAppState();
@@ -39,7 +33,7 @@ export function TrackerSummary() {
             <div className="counter-num">{days.toLocaleString('he-IL')}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700 }}>
-                {daysWord(days)}
+                {cleanDaysWord(days)}
                 {s.trackers.length > 1 || t.name !== 'ההתמכרות שלי' ? ` · ${t.name}` : ''}
               </div>
               <div className="counter-sub">

@@ -22,7 +22,10 @@ function greeting(h = new Date().getHours()) {
   return 'לילה טוב';
 }
 
-/** עדכון יום, ואם כל חמשת הצעדים נעשו, סימון היום כהושלם וחגיגה */
+/**
+ * עדכון יום. "הושלם" נקבע לפי חמשת הצעדים: כשכולם נעשו היום מסומן כהושלם (וחוגגים),
+ * וכשמבטלים צעד, הסימון יורד. ימים שסומנו ידנית בגרסאות קודמות נשארים כמו שהם.
+ */
 function updateWithFlow(date: ISODate, patch: (d: DayRecord) => DayRecord, celebrateDone: boolean): boolean {
   let completed = false;
   updateDay(date, (d) => {
@@ -30,8 +33,9 @@ function updateWithFlow(date: ISODate, patch: (d: DayRecord) => DayRecord, celeb
     const all = flowState(next).every(Boolean);
     if (all && !d.done) {
       completed = true;
-      return { ...next, done: true };
+      return { ...next, done: true, doneBy: 'flow' };
     }
+    if (!all && d.done && d.doneBy === 'flow') return { ...next, done: false, doneBy: undefined };
     return next;
   });
   if (completed && celebrateDone) {
@@ -176,7 +180,6 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
       <div className="stack">
         <div className="card commit" id="sec-pledge">
           <div className="commit-title">רק להיום · 24 שעות</div>
-          <div className="bm-step">צעד {pos.step}</div>
           <p className="bm-text">{content.step.commitment}</p>
           {isToday &&
             (rec.checkin ? (
@@ -313,28 +316,6 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
           </div>
         )}
 
-        {!isFuture &&
-          (rec.done ? (
-            <div className="card" style={{ textAlign: 'center' }}>
-              <div className="done-state">✓ העבודה של היום הושלמה</div>
-              <div>
-                <button className="btn btn-ghost" onClick={() => updateDay(date, (d) => ({ ...d, done: false }))}>
-                  ביטול הסימון
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              className="btn btn-ghost btn-block"
-              onClick={() => {
-                updateDay(date, (d) => ({ ...d, done: true }));
-                celebrate({ size: 'small', title: 'העבודה של היום הושלמה' });
-              }}
-            >
-              סימון היום כהושלם
-            </button>
-          ))}
-
         {s.editorMode && (
           <ContentEditor key={pos.key} contentKey={pos.key} label={`${content.step.name}, יום ${pos.day}`} />
         )}
@@ -349,12 +330,12 @@ function ReasonOfTheDay({ date }: { date: ISODate }) {
   const n = Math.abs(date.split('-').reduce((a, x) => a * 31 + Number(x), 7));
   const r = s.reasons[n % s.reasons.length];
   return (
-    <a className="card reason-today" href="#/clean">
+    <div className="card reason-today">
       {r.photo && <img src={r.photo} alt="" />}
       <span>
         <span className="card-label">למה בחרתי בדרך הזו</span>
         {r.text && <span className="reason-today-text">{r.text}</span>}
       </span>
-    </a>
+    </div>
   );
 }

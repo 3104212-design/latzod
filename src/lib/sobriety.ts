@@ -124,6 +124,11 @@ export function longestMs(t: Tracker, now = Date.now()): number {
   return Math.max(elapsedMs(t.since, now), ...past, 0);
 }
 
+/** המילה שליד מספר גדול של ימים: "1 יום נקי", "2 ימים נקיים" */
+export function cleanDaysWord(n: number): string {
+  return n === 1 ? 'יום נקי' : 'ימים נקיים';
+}
+
 export function daysLabel(n: number): string {
   if (n === 1) return 'יום אחד';
   if (n === 2) return 'יומיים';
@@ -146,8 +151,9 @@ export function formatMoney(n: number): string {
 }
 
 export function formatHours(h: number): string {
-  if (h < 48) return `${Math.floor(h).toLocaleString('he-IL')} שעות`;
-  return `${Math.floor(h / 24).toLocaleString('he-IL')} ימים`;
+  const whole = Math.floor(h);
+  if (h < 48) return whole === 1 ? 'שעה אחת' : whole === 2 ? 'שעתיים' : `${whole.toLocaleString('he-IL')} שעות`;
+  return daysLabel(Math.floor(h / 24));
 }
 
 /** האם צריך אזהרה רפואית על הפסקה פתאומית (אלכוהול, כדורי הרגעה) */

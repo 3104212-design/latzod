@@ -80,6 +80,8 @@ const ROUTES = [
   { hash: '#/', click: '.sos-btn' },
   { hash: '#/clean', clickText: 'עריכה' },
   { hash: '#/clean', clickText: 'מעדתי' },
+  { hash: '#/clean', click: '.stats > button:nth-child(1)' },
+  { hash: '#/clean', click: '.stats > button:nth-child(2)' },
   { hash: '#/more', clickText: 'הגדרת קוד' },
   { hash: '#/journal', search: 'בכנות' },
   { hash: '#/', celebrate: true },

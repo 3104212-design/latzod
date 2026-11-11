@@ -140,3 +140,15 @@ export function audit({ minTap = 40 } = {}) {
 
   return issues;
 }
+
+/** טקסטים שמופיעים יותר מפעם אחת במסך (כפילויות תוכן). מתעלם מטקסטים קצרים מאוד */
+export function duplicates({ min = 6 } = {}) {
+  const seen = new Map();
+  for (const el of document.querySelectorAll('body *')) {
+    if (!visible(el) || el.closest('[aria-hidden="true"], .bottom-nav, svg')) continue;
+    const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+    if (own.length < min) continue;
+    seen.set(own, (seen.get(own) ?? 0) + 1);
+  }
+  return [...seen.entries()].filter(([, n]) => n > 1).map(([t, n]) => `${n}× "${t.slice(0, 60)}"`);
+}

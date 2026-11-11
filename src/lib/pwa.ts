@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { createBus, toast } from './feedback';
+import { isIOS } from './files';
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -22,7 +23,6 @@ let deferred: InstallPromptEvent | null = null;
 const standaloneNow = () =>
   matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 const bus = createBus<PwaState>({ canPrompt: false, standalone: standaloneNow(), ios: isIOS });
 const update = (p: Partial<PwaState>) => bus.set({ ...bus.get(), ...p });

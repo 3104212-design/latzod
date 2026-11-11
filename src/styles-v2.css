@@ -634,11 +634,6 @@
   box-shadow: var(--shadow);
 }
 
-.row.times > .field {
-  flex: 1;
-  min-width: 120px;
-}
-
 input[type='time'],
 input[type='search'] {
   width: 100%;
@@ -652,7 +647,12 @@ input[type='search'] {
 
 .about-row {
   align-items: center;
-  margin-top: 12px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.about-note {
+  margin: 8px 0 0 !important;
 }
 
 .whats-new {
@@ -756,38 +756,22 @@ mark {
   min-width: 0;
 }
 
-/* התפריט התחתון לא חורג מהמסך גם בטקסט גדול */
-.bottom-nav ul {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+/* חלון ערך מהיר (עלות יומית, זמן ביום) */
+.quick-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.bottom-nav a {
-  min-width: 0;
-  padding-inline: 0;
-  white-space: nowrap;
-}
-
-/* רכיב מוסתר לקוראי מסך בלבד. גובר על הרוחב של שדות הקלט */
-.sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  border: 0 !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  white-space: nowrap !important;
-}
-
-/* כפתורי מצב הרוח מתכווצים, והתווית יורדת שורה במקום לדחוף את המסך */
-.moods {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-.mood small {
+.quick-input input {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 700;
   text-align: center;
-  line-height: 1.15;
-  overflow-wrap: anywhere;
+}
+
+.quick-unit {
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 40px;
 }

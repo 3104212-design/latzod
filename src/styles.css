@@ -726,7 +726,8 @@ input:focus {
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* minmax(0, 1fr): התפריט לא חורג מהמסך גם בטקסט גדול */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .bottom-nav a {
@@ -734,7 +735,9 @@ input:focus {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 4px 10px;
+  min-width: 0;
+  padding: 8px 0 10px;
+  white-space: nowrap;
   text-decoration: none;
   color: var(--muted);
   font-size: 13px;
@@ -941,9 +944,10 @@ input:focus {
   display: block;
   font-family: var(--display);
   font-weight: 400;
-  font-size: 30px;
+  font-size: 26px;
   color: var(--green-deep);
   line-height: 1.1;
+  word-break: break-word;
 }
 
 .stat span {
@@ -977,6 +981,7 @@ input:focus {
 
 /* ---------- הגדרות ---------- */
 .field {
+  min-width: 0;
   margin-bottom: 14px;
 }
 
@@ -1053,7 +1058,8 @@ input:focus {
 .sheet {
   width: 100%;
   max-width: 560px;
-  max-height: 92dvh;
+  /* לא נכנס מתחת לפס המצב של הטלפון */
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
   overflow: auto;
   background: var(--bg);
   border-radius: 26px 26px 0 0;
@@ -1213,13 +1219,18 @@ input:focus {
   margin-bottom: 8px;
 }
 
+/* מוסתר, אבל קריא לקוראי מסך. גובר על רוחב של שדות קלט */
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
 }
 
 /* ---------- ספירה (בהשראת I Am Sober) ---------- */
@@ -1301,11 +1312,6 @@ button.stat {
   font: inherit;
   color: inherit;
   cursor: pointer;
-}
-
-.stat b {
-  font-size: 24px;
-  word-break: break-word;
 }
 
 .next-ms {
@@ -1500,7 +1506,7 @@ button.stat {
 
 .moods {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -1521,6 +1527,9 @@ button.stat {
   font-size: 11px;
   color: var(--muted);
   font-weight: 600;
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .mood.on {

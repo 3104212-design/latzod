@@ -10,20 +10,6 @@ export function useNow(interval = 1000): number {
   return now;
 }
 
-/** שיתוף טקסט: דרך תפריט השיתוף של המכשיר, ואם אין, העתקה ללוח */
-export async function shareText(title: string, text: string): Promise<'shared' | 'copied' | 'failed'> {
-  try {
-    if (navigator.share) {
-      await navigator.share({ title, text });
-      return 'shared';
-    }
-    await navigator.clipboard.writeText(text);
-    return 'copied';
-  } catch {
-    return 'failed';
-  }
-}
-
 /** מקטין תמונה ומחזיר אותה כ-JPEG ב-data URL, כדי שתיכנס לאחסון המקומי */
 export async function compressImage(file: File, max = 720, quality = 0.72): Promise<string> {
   // createImageBitmap לא מפענח בכל המכשירים כל סוג תמונה (למשל HEIC מאייפון), ולכן יש גם דרך גיבוי

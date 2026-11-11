@@ -5,7 +5,7 @@ import { Sheet } from './Sheet';
 import { celebrate, toast } from '../lib/feedback';
 import { useNow } from '../lib/hooks';
 import { renderShareImage, shareImage } from '../lib/shareImage';
-import { elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
+import { cleanDaysWord, elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
 import { setState, useAppState } from '../lib/store';
 import { APP_VERSION, releaseOf, WHATS_NEW } from '../lib/version';
 
@@ -34,7 +34,7 @@ export function MilestoneWatcher() {
                 }
               : undefined,
           });
-        renderShareImage({ days: reached, label: reached === 1 ? 'יום נקי' : 'ימים נקיים', subtitle: label })
+        renderShareImage({ days: reached, label: cleanDaysWord(reached), subtitle: label })
           .then(show)
           .catch(() => show(null));
         break; // חגיגה אחת בכל פעם

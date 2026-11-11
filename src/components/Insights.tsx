@@ -4,7 +4,8 @@ import { addDays, formatShort, todayISO } from '../lib/dates';
 import { MOODS } from '../lib/sobriety';
 import { useAppState, type AppState } from '../lib/store';
 
-function pledgeStreak(s: AppState): number {
+/** רצף ההתחייבויות: ימים רצופים עם "רק להיום" (היום נספר אם כבר התחייבו בו, אחרת מתחילים מאתמול) */
+export function pledgeStreak(s: AppState): number {
   let d = todayISO();
   if (!s.days[d]?.checkin) d = addDays(d, -1);
   let n = 0;
@@ -32,7 +33,7 @@ export function Insights() {
   const today = todayISO();
   const records = Object.entries(s.days);
   const reviews = records.filter(([, r]) => r.review).map(([d, r]) => ({ date: d, ...r.review! }));
-  const pledges = records.filter(([, r]) => r.checkin).length;
+  const doneDays = records.filter(([, r]) => r.done).length;
 
   // טריגרים מסיכומי הערב וממה שנרשם בחלון "עזרה עכשיו"
   const counts = new Map<string, number>();
@@ -61,8 +62,8 @@ export function Insights() {
           <span>רצף התחייבויות</span>
         </div>
         <div className="card stat">
-          <b>{pledges}</b>
-          <span>התחייבויות בסך הכל</span>
+          <b>{doneDays}</b>
+          <span>ימים שהושלמו</span>
         </div>
         <div className="card stat">
           <b>{reviews.filter((r) => r.clean).length}</b>

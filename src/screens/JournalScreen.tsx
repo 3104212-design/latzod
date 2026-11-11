@@ -4,22 +4,10 @@ import { useMemo, useState } from 'react';
 import { getStep } from '../content/steps';
 import { TopBar } from '../components/Chrome';
 import { Insights } from '../components/Insights';
-import { addDays, formatHebrew, formatLong, todayISO } from '../lib/dates';
+import { formatHebrew, formatLong, todayISO } from '../lib/dates';
 import { positionFor } from '../lib/program';
-import { MOODS } from '../lib/sobriety';
-import { trackOf, useAppState, type AppState } from '../lib/store';
-
-function streak(s: AppState): number {
-  const active = (d: string) => !!(s.days[d]?.checkin || s.days[d]?.done);
-  let d = todayISO();
-  if (!active(d)) d = addDays(d, -1);
-  let n = 0;
-  while (active(d)) {
-    n++;
-    d = addDays(d, -1);
-  }
-  return n;
-}
+import { daysLabel, MOODS } from '../lib/sobriety';
+import { trackOf, useAppState } from '../lib/store';
 
 const PAGE = 30;
 
@@ -59,7 +47,6 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
       });
   }, [s.days, today, query]);
 
-  const doneCount = Object.values(s.days).filter((r) => r.done).length;
 
   return (
     <>
@@ -71,13 +58,7 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
       <div className="stack">
         <Insights />
 
-        <p className="section-title">
-          רשומות היומן
-          <span className="muted small">
-            {' '}
-            · {doneCount} ימי עבודה הושלמו · רצף פעילות {streak(s)} ימים
-          </span>
-        </p>
+        <p className="section-title">רשומות היומן</p>
 
         <div className="search">
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -111,7 +92,7 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
           </div>
         ) : (
           <>
-            {query && <p className="muted small">נמצאו {entries.length} ימים</p>}
+            {query && <p className="muted small">נמצאו {daysLabel(entries.length)}</p>}
             {entries.slice(0, limit).map(({ d, r, texts }) => {
               const pos = positionFor(d, trackOf(s));
               const shown = query ? texts.find((t) => t.toLowerCase().includes(query.toLowerCase())) ?? texts[0] : texts[0];

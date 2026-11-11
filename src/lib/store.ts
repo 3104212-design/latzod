@@ -13,6 +13,8 @@ export interface DayRecord {
   checkin?: string;
   /** העבודה של היום הושלמה */
   done?: boolean;
+  /** 'flow': הסימון נקבע אוטומטית מחמשת הצעדים, ולכן יורד אם מבטלים צעד */
+  doneBy?: 'flow';
   answers?: string[];
   /** נוסח השאלות שעליהן ענו באותו יום */
   questions?: string[];
@@ -188,7 +190,11 @@ export function saveTracker(t: Omit<Tracker, 'id' | 'history'> & Partial<Pick<Tr
 }
 
 export function removeTracker(id: string) {
-  setState((s) => ({ ...s, trackers: s.trackers.filter((t) => t.id !== id) }));
+  setState((s) => {
+    const celebrated = { ...s.celebrated };
+    delete celebrated[id];
+    return { ...s, celebrated, trackers: s.trackers.filter((t) => t.id !== id) };
+  });
 }
 
 /** מעידה: הרצף הנוכחי נשמר בהיסטוריה, וספירה חדשה מתחילה מעכשיו */

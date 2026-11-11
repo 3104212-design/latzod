@@ -36,15 +36,6 @@ input::-webkit-datetime-edit {
   min-width: 0;
 }
 
-.field {
-  min-width: 0;
-}
-
-/* חלון תחתון לא נכנס מתחת לפס המצב */
-.sheet {
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
-}
-
 /* טקסט קטן על הירוק הבהיר: צל עדין לקריאות טובה יותר */
 .hero,
 .counter-hero,

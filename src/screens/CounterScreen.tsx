@@ -13,6 +13,7 @@ import {
   MILESTONES,
   TRIGGERS,
   breakdown,
+  cleanDaysWord,
   daysLabel,
   durationLabel,
   elapsedMs,
@@ -142,6 +143,7 @@ function TrackerView({
   onShare: (blob: Blob, days: number) => void;
 }) {
   const [withName, setWithName] = useState(false);
+  const [quick, setQuick] = useState<'cost' | 'hours' | null>(null);
   const ms = elapsedMs(t.since, now);
   const b = breakdown(ms);
   // התמונה מוכנה מראש, כדי שתפריט השיתוף ייפתח ישירות מהלחיצה (אייפון דורש זאת)
@@ -151,7 +153,7 @@ function TrackerView({
     setShareBlob(null);
     renderShareImage({
       days: b.days,
-      label: b.days === 1 ? 'יום נקי' : 'ימים נקיים',
+      label: cleanDaysWord(b.days),
       subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
     })
       .then((blob) => alive && setShareBlob(blob))
@@ -169,10 +171,9 @@ function TrackerView({
     <>
       <section className="counter-hero">
         <Feet />
-        <div className="counter-name">{t.name}</div>
         <Dial total={24} states={ticks} current={b.hours + 1} label={`${daysLabel(b.days)} נקיים`}>
           <span className="dial-num">{b.days.toLocaleString('he-IL')}</span>
-          <span className="dial-of">{b.days === 1 ? 'יום נקי' : 'ימים נקיים'}</span>
+          <span className="dial-of">{cleanDaysWord(b.days)}</span>
         </Dial>
         <div className="clock" dir="ltr" aria-label="שעות, דקות ושניות">
           {pad(b.hours)}:{pad(b.minutes)}:{pad(b.seconds)}
@@ -183,30 +184,25 @@ function TrackerView({
       </section>
 
       <div className="stats">
-        {t.costPerDay ? (
-          <div className="card stat">
-            <b>{formatMoney(moneySaved(t, ms))}</b>
-            <span>נחסכו</span>
-          </div>
-        ) : (
-          <button className="card stat add" onClick={onEdit}>
-            <b>+ ₪</b>
-            <span>להוסיף עלות יומית</span>
-          </button>
-        )}
-        {t.hoursPerDay ? (
-          <div className="card stat">
-            <b>{formatHours(hoursSaved(t, ms))}</b>
-            <span>של זמן חזרו אליי</span>
-          </div>
-        ) : (
-          <button className="card stat add" onClick={onEdit}>
-            <b>+ שעות</b>
-            <span>להוסיף זמן ביום</span>
-          </button>
-        )}
+        {/* כל כרטיס פותח חלון משלו: עלות יומית או זמן ביום. אפשר ללחוץ גם אחרי שיש ערך, כדי לשנות */}
+        <button
+          className={`card stat${t.costPerDay ? '' : ' add'}`}
+          onClick={() => setQuick('cost')}
+          aria-label={t.costPerDay ? `נחסכו ${formatMoney(moneySaved(t, ms))}. לשינוי העלות היומית` : 'הוספת עלות יומית'}
+        >
+          <b>{t.costPerDay ? formatMoney(moneySaved(t, ms)) : '+ ₪'}</b>
+          <span>{t.costPerDay ? `נחסכו · ${formatMoney(t.costPerDay)} ליום` : 'להוסיף עלות יומית'}</span>
+        </button>
+        <button
+          className={`card stat${t.hoursPerDay ? '' : ' add'}`}
+          onClick={() => setQuick('hours')}
+          aria-label={t.hoursPerDay ? `${formatHours(hoursSaved(t, ms))} חזרו אליי. לשינוי הזמן ביום` : 'הוספת זמן ביום'}
+        >
+          <b>{t.hoursPerDay ? formatHours(hoursSaved(t, ms)) : '+ שעות'}</b>
+          <span>{t.hoursPerDay ? `של זמן חזרו אליי · ${t.hoursPerDay} ש׳ ביום` : 'להוסיף זמן ביום'}</span>
+        </button>
         <div className="card stat">
-          <b>{Math.floor(best / DAY_MS).toLocaleString('he-IL')}</b>
+          <b>{daysLabel(Math.floor(best / DAY_MS))}</b>
           <span>הרצף הארוך ביותר</span>
         </div>
       </div>
@@ -298,7 +294,83 @@ function TrackerView({
           </p>
         </div>
       )}
+      {quick && <QuickValueSheet t={t} kind={quick} onClose={() => setQuick(null)} />}
     </>
+  );
+}
+
+const QUICK = {
+  cost: {
+    title: 'עלות יומית',
+    question: 'כמה כסף הלך על זה ביום, בערך?',
+    hint: 'לפי זה מחושב כמה כסף נחסך מאז שהתחלת. אפשר לשנות בכל זמן.',
+    unit: '₪',
+    presets: [20, 50, 100, 200, 500],
+    field: 'costPerDay' as const,
+    label: (n: number) => formatMoney(n),
+  },
+  hours: {
+    title: 'זמן ביום',
+    question: 'כמה שעות ביום הלכו על זה, בערך?',
+    hint: 'כולל לחפש, להשיג, להשתמש ולהתאושש. לפי זה מחושב כמה זמן חזר אלייך.',
+    unit: 'שעות',
+    presets: [1, 2, 3, 5, 8],
+    field: 'hoursPerDay' as const,
+    label: (n: number) => (n === 1 ? 'שעה' : n === 2 ? 'שעתיים' : `${n} שעות`),
+  },
+};
+
+/** חלון קטן לערך אחד: עלות יומית או זמן ביום */
+function QuickValueSheet({ t, kind, onClose }: { t: Tracker; kind: 'cost' | 'hours'; onClose: () => void }) {
+  const q = QUICK[kind];
+  const cur = t[q.field];
+  const [val, setVal] = useState(cur ? String(cur) : '');
+  const n = parseFloat(val);
+  const valid = Number.isFinite(n) && n > 0 && (kind === 'cost' ? n <= 100000 : n <= 24);
+  const save = (v?: number) => {
+    saveTracker({ ...t, [q.field]: v });
+    onClose();
+  };
+  return (
+    <Sheet title={q.title} onClose={onClose}>
+      <div className="card">
+        <div className="field">
+          <label htmlFor="quick-val">{q.question}</label>
+          <div className="quick-input">
+            <input
+              id="quick-val"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step={kind === 'hours' ? '0.5' : '1'}
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && valid && save(n)}
+            />
+            <span className="quick-unit">{q.unit}</span>
+          </div>
+          {val && !valid && <p className="warn-note" style={{ marginTop: 8 }}>{kind === 'hours' ? 'מספר בין 0 ל-24' : 'מספר גדול מ-0'}</p>}
+        </div>
+        <div className="chips">
+          {q.presets.map((p) => (
+            <button key={p} type="button" className={`chip${n === p ? ' on' : ''}`} onClick={() => setVal(String(p))}>
+              {q.label(p)}
+            </button>
+          ))}
+        </div>
+        <p className="muted small" style={{ marginTop: 12 }}>
+          {q.hint}
+        </p>
+        <button className="btn btn-primary btn-block" disabled={!valid} onClick={() => save(n)}>
+          שמירה
+        </button>
+        {cur ? (
+          <button className="btn btn-ghost btn-block" style={{ marginTop: 8 }} onClick={() => save(undefined)}>
+            הסרה
+          </button>
+        ) : null}
+      </div>
+    </Sheet>
   );
 }
 
@@ -318,7 +390,8 @@ function TrackerEditor({ tracker, onClose, onSaved }: { tracker?: Tracker; onClo
       id: tracker?.id,
       history: tracker?.history,
       name: name.trim() || 'ההתמכרות שלי',
-      since: since || nowInputValue(),
+      // תאריך עתידי לא הגיוני לספירה: מגבילים לרגע הזה
+      since: !since || since > nowInputValue() ? nowInputValue() : since,
       costPerDay: num(cost),
       hoursPerDay: num(hours),
     });
@@ -347,7 +420,8 @@ function TrackerEditor({ tracker, onClose, onSaved }: { tracker?: Tracker; onClo
         )}
         <div className="field">
           <label htmlFor="tr-since">נקי מאז</label>
-          <input id="tr-since" type="datetime-local" value={since} onChange={(e) => setSince(e.target.value)} />
+          <input id="tr-since" type="datetime-local" value={since} max={nowInputValue()} onChange={(e) => setSince(e.target.value)} />
+          {since > nowInputValue() && <p className="warn-note" style={{ marginTop: 8 }}>התאריך בעתיד. הספירה תתחיל מעכשיו.</p>}
         </div>
         <div className="field">
           <label htmlFor="tr-cost">כמה כסף הלך על זה ביום, בערך (₪)</label>

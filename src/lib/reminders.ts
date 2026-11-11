@@ -1,3 +1,5 @@
+import { saveFile } from './files';
+
 // תזכורות: קובץ יומן (iCalendar) עם שני אירועים יומיים, בוקר וערב, כל אחד עם התראה.
 // אין לאפליקציה שרת ששולח התראות, ולכן התזכורת נכנסת ליומן של הטלפון.
 
@@ -70,14 +72,7 @@ export function buildReminders(morning: string, evening: string, url = location.
 
 export function downloadReminders(morning: string, evening: string) {
   const blob = new Blob([buildReminders(morning, evening)], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'latzod-reminders.ics';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  return saveFile(blob, 'latzod-reminders.ics');
 }
 
 // ---------- אייפון: קבצים מוכנים בשרת ----------

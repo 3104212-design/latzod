@@ -1,4 +1,4 @@
-// "המסלול של היום": חמשת הצעדים הקטנים של כל יום, עם התקדמות.
+// "סדר היום": חמשת הדברים הקטנים של כל יום, עם התקדמות. (לא "המסלול", שהוא 12 הצעדים)
 
 import type { DayRecord } from '../lib/store';
 
@@ -23,15 +23,17 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
   const c = 2 * Math.PI * r;
 
   const go = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    const target = document.getElementById(id);
+    if (!target) return;
+    // סיכום הערב עטוף ב-div, וההדגשה צריכה להיות על הכרטיס עצמו
+    const el = target.classList.contains('card') ? target : (target.querySelector('.card') as HTMLElement) ?? target;
+    target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     el.classList.add('flash');
     setTimeout(() => el.classList.remove('flash'), 1200);
   };
 
   return (
-    <nav className="card flow" aria-label="המסלול של היום">
+    <nav className="card flow" aria-label="סדר היום">
       <div className="flow-head">
         <svg className="flow-ring" viewBox="0 0 56 56" aria-hidden="true">
           <circle cx="28" cy="28" r={r} className="track" />
@@ -41,9 +43,9 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
           {n}/5
         </span>
         <span>
-          <b>{n === 5 ? 'היום הושלם' : 'המסלול של היום'}</b>
+          <b>{n === 5 ? 'סדר היום הושלם' : 'סדר היום'}</b>
           <span className="muted small" style={{ display: 'block' }}>
-            {n === 5 ? 'כל חמשת הצעדים נעשו. כל הכבוד.' : nextIdx >= 0 ? `הצעד הבא: ${FLOW[nextIdx].label}` : ''}
+            {n === 5 ? 'כל החמישה נעשו. כל הכבוד.' : nextIdx >= 0 ? `הבא בתור: ${FLOW[nextIdx].label}` : ''}
           </span>
         </span>
       </div>

@@ -1,7 +1,10 @@
 // שמירת קובץ מהאפליקציה. באייפון (בעיקר כאפליקציה מותקנת) הורדה רגילה לא תמיד עובדת,
 // ולכן משתמשים בתפריט השיתוף של המכשיר, שבו יש "שמירה בקבצים".
 
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// typeof navigator: הקובץ נטען גם בזמן הבנייה (קובצי התזכורות), מחוץ לדפדפן
+const isIOS =
+  typeof navigator !== 'undefined' &&
+  (/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
 function download(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
