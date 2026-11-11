@@ -81,6 +81,7 @@ try {
     else if (action?.startsWith('walk:')) await evaluate(`document.querySelector('.walk-cta')?.click(); new Promise((r) => setTimeout(() => { document.querySelectorAll('.walk-foot')[${Number(action.slice(5))}]?.click(); r(); }, 300))`);
     else if (action === 'bisect')
       console.log('bisect:', JSON.stringify(await evaluate(`(() => { const sels = ['.bottom-nav', '.topbar', '.hero', '.page-head', '.stack > *', '.toasts', '.stack']; const out = {}; for (const sel of sels) { const els = [...document.querySelectorAll(sel)]; els.forEach((e) => (e.style.display = 'none')); out[sel] = document.documentElement.scrollWidth; els.forEach((e) => (e.style.display = '')); } const kids = [...document.querySelectorAll('.stack > *')]; out.kids = kids.map((k, i) => { k.style.display = 'none'; const w = document.documentElement.scrollWidth; k.style.display = ''; return w < 356 ? i + ':' + k.className : null; }).filter(Boolean); return out; })()`)));
+    else if (action?.startsWith('to:')) await evaluate(`document.querySelector(${JSON.stringify(action.slice(3))})?.scrollIntoView({ block: 'center' })`);
     else if (action === 'scroll') await evaluate(`window.scrollTo(0, document.body.scrollHeight / 2)`);
     else if (action === 'bottom') await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
     else if (action) await evaluate(`document.querySelector(${JSON.stringify(action)})?.click()`);

@@ -1,6 +1,6 @@
 // גרסת האפליקציה, ומה חדש בכל גרסה ראשית. אחרי עדכון מוצג רק מה שעוד לא הוצג.
 
-export const APP_VERSION = '2.3.0';
+export const APP_VERSION = '2.3.1';
 
 export interface ReleaseNotes {
   /** גרסה ראשית, למשל "2.2" */

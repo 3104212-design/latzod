@@ -1008,7 +1008,8 @@ input:focus {
   word-break: break-word;
 }
 
-.stat span {
+/* התווית בלבד: תיבת הסמל (.stat-ic) היא גם span, וחוק כללי היה מוציא את הסמל מהמרכז */
+.stat > span:not(.stat-ic) {
   display: block;
   font-size: 13px;
   line-height: 1.35;
