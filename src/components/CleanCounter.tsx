@@ -4,6 +4,7 @@ import { useNow } from '../lib/hooks';
 import { breakdown, cleanDaysWord, durationLabel, elapsedMs, nextMilestone } from '../lib/sobriety';
 import { useAppState } from '../lib/store';
 import { I } from './Icons';
+import { CardTag } from './CardTag';
 
 export function TrackerSummary() {
   const s = useAppState();
@@ -24,7 +25,10 @@ export function TrackerSummary() {
   }
 
   return (
-    <a className="card tracker-summary" href="#/clean">
+    <a className="card tracker-summary cat" href="#/clean">
+      <CardTag icon={I.clock({ size: 18 })} as="p">
+        הספירה
+      </CardTag>
       {s.trackers.map((t) => {
         const ms = elapsedMs(t.since, now);
         const { days, hours } = breakdown(ms);

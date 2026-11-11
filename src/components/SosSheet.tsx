@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChipPicker, Sheet } from './Sheet';
+import { Scale } from './Scale';
 import { TRIGGERS } from '../lib/sobriety';
 import { logCraving, useAppState } from '../lib/store';
 
@@ -64,7 +65,7 @@ export function SosSheet({ onClose }: { onClose: () => void }) {
               <label htmlFor="sos-int">
                 עוצמה: <b>{intensity}</b>/10
               </label>
-              <input id="sos-int" type="range" min={1} max={10} value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} />
+              <Scale id="sos-int" min={1} max={10} value={intensity} onChange={setIntensity} low="חלש" high="חזק מאוד" />
             </div>
             <div className="field">
               <label>מה הפעיל אותו?</label>

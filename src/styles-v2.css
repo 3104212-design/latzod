@@ -192,29 +192,6 @@
   }
 }
 
-/* כפתור סימון: קראתי, אמרתי את התפילה */
-.check-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--tap);
-  margin-top: 12px;
-  padding: 6px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  color: var(--green-deep);
-  font-weight: 700;
-  font-size: 15px;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.check-btn.on {
-  background: var(--green);
-  border-color: var(--green);
-  color: var(--on-green);
-}
-
 .btn-pledge {
   animation: pulse 2.4s ease-in-out infinite;
 }

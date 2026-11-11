@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { getContent, type DayContent } from '../lib/program';
 import { setState, useAppState } from '../lib/store';
+import { I } from '../components/Icons';
 
 export function ContentEditor({ contentKey, label }: { contentKey: string; label: string }) {
   const s = useAppState();
@@ -71,7 +72,13 @@ export function ContentEditor({ contentKey, label }: { contentKey: string; label
         <textarea id="ed-prayer" value={prayer} onChange={(e) => setPrayer(e.target.value)} />
       </div>
       <button className="btn btn-primary btn-block" onClick={save}>
-        {saved ? '✓ נשמר' : 'שמירת התוכן של היום'}
+        {saved ? (
+          <>
+            {I.check({ size: 18 })} נשמר
+          </>
+        ) : (
+          'שמירת התוכן של היום'
+        )}
       </button>
     </div>
   );

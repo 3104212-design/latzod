@@ -128,7 +128,12 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
                   </div>
                   <div className="entry-meta">
                     {pos && `${getStep(pos.step).name} · יום ${pos.day}`}
-                    {r.done ? ' · ✓ הושלם' : ''}
+                    {r.done && (
+                      <>
+                        {' · '}
+                        <span className="entry-done">{I.check({ size: 14 })}הושלם</span>
+                      </>
+                    )}
                     {r.review && (r.review.clean ? ' · יום נקי' : ' · הייתה מעידה')}
                   </div>
                   {shown && (

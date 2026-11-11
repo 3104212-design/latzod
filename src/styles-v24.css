@@ -1,0 +1,576 @@
+/* ===== 2.4: צבעי משנה לקטגוריות, כותרות בכמוסה, גופן חם לטקסטים האישיים, פתיחה מונפשת =====
+   הירוק נשאר הצבע הראשי. לכל אחד מחמשת הצעדים (ולאתגר) צבע משנה משלו, כדי שהקטגוריות ייפרדו זו מזו. */
+
+:root {
+  /* הגופן "החם": עגול וברור, באמצע הדרך בין כתב יד לדפוס. להתחייבות, לתפילה ולשאלות */
+  --voice: 'Fredoka Variable', 'Heebo Variable', system-ui, sans-serif;
+  /* ירוק לכמוסה (טקסט לבן עליו). במצב כהה --green בהיר מדי בשביל טקסט לבן */
+  --c-green: #3f9d43;
+  --c-read: #2774b6;
+  --c-read-ink: #1f68a6;
+  --c-read-soft: #e6f0fa;
+  --c-questions: #0f8078;
+  --c-questions-ink: #0c736b;
+  --c-questions-soft: #e2f3f1;
+  --c-prayer: #7b5cc8;
+  --c-prayer-ink: #5c41a6;
+  --c-prayer-soft: #efeafa;
+  --c-review: #c44a62;
+  --c-review-ink: #ad3a52;
+  --c-review-soft: #fbeaed;
+  --c-challenge: #c25a17;
+  --c-challenge-ink: #b2531a;
+  --c-challenge-soft: #fdefe4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --c-green: #2e7a34;
+    --c-read: #2774b6;
+    --c-read-ink: #93c4ee;
+    --c-read-soft: #15273a;
+    --c-questions: #0f8078;
+    --c-questions-ink: #82d4cb;
+    --c-questions-soft: #11302c;
+    --c-prayer: #7660c0;
+    --c-prayer-ink: #c4b4f2;
+    --c-prayer-soft: #241f3c;
+    --c-review: #bb5268;
+    --c-review-ink: #f1a6b4;
+    --c-review-soft: #371c23;
+    --c-challenge: #c25a17;
+    --c-challenge-ink: #f4b383;
+    --c-challenge-soft: #372516;
+  }
+}
+
+:root[data-theme='dark'] {
+  --c-green: #2e7a34;
+  --c-read: #2774b6;
+  --c-read-ink: #93c4ee;
+  --c-read-soft: #15273a;
+  --c-questions: #0f8078;
+  --c-questions-ink: #82d4cb;
+  --c-questions-soft: #11302c;
+  --c-prayer: #7660c0;
+  --c-prayer-ink: #c4b4f2;
+  --c-prayer-soft: #241f3c;
+  --c-review: #bb5268;
+  --c-review-ink: #f1a6b4;
+  --c-review-soft: #371c23;
+  --c-challenge: #c25a17;
+  --c-challenge-ink: #f4b383;
+  --c-challenge-soft: #372516;
+}
+
+/* מחלקת הקטגוריה מגדירה את הצבע. ברירת המחדל (התחייבות, סדר היום, הצעד) היא הירוק */
+.cat,
+.cat-pledge,
+.cat-flow {
+  --cat: var(--c-green);
+  --cat-ink: var(--green-deep);
+  --cat-soft: var(--green-soft);
+}
+
+.cat-read {
+  --cat: var(--c-read);
+  --cat-ink: var(--c-read-ink);
+  --cat-soft: var(--c-read-soft);
+}
+
+.cat-questions {
+  --cat: var(--c-questions);
+  --cat-ink: var(--c-questions-ink);
+  --cat-soft: var(--c-questions-soft);
+}
+
+.cat-prayer {
+  --cat: var(--c-prayer);
+  --cat-ink: var(--c-prayer-ink);
+  --cat-soft: var(--c-prayer-soft);
+}
+
+.cat-review {
+  --cat: var(--c-review);
+  --cat-ink: var(--c-review-ink);
+  --cat-soft: var(--c-review-soft);
+}
+
+.cat-challenge {
+  --cat: var(--c-challenge);
+  --cat-ink: var(--c-challenge-ink);
+  --cat-soft: var(--c-challenge-soft);
+}
+
+/* ---------- כותרת בכמוסה, על הקצה העליון של הכרטיס ---------- */
+.card.cat {
+  position: relative;
+}
+
+.stack > .card.cat,
+.stack > div > .card.cat {
+  margin-top: 12px;
+}
+
+.card-tag-wrap {
+  display: flex;
+  justify-content: center;
+  /* חצי מהכמוסה מעל הכרטיס: ריפוד (18) + מסגרת (1) + חצי גובה (17) */
+  margin: -36px 0 12px;
+}
+
+.card-tag-wrap > .card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  min-height: 34px;
+  margin: 0;
+  padding: 5px 16px;
+  border-radius: 999px;
+  background: var(--cat);
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: none;
+  /* טבעת בצבע הרקע: הכמוסה "חותכת" את קו הכרטיס */
+  box-shadow: 0 0 0 4px var(--bg), 0 8px 16px -10px var(--cat);
+  outline: none;
+}
+
+.card-tag .ic {
+  flex: none;
+  opacity: 0.92;
+}
+
+.card-tag > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* כרטיס בצבע הקטגוריה כרקע עדין (השאלון) */
+.questionnaire.cat {
+  background: var(--cat-soft);
+}
+
+/* ---------- כפתור סימון על הקצה התחתון, משמאל, חצי בחוץ ---------- */
+.card.has-float {
+  padding-bottom: 36px;
+  margin-bottom: 34px;
+}
+
+.float-check {
+  position: absolute;
+  bottom: -24px;
+  inset-inline-end: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  max-width: calc(100% - 36px);
+  padding-block: 6px;
+  padding-inline: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--card-line);
+  background: var(--surface);
+  color: var(--cat-ink);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+  box-shadow: 0 0 0 4px var(--bg), 0 10px 22px -12px rgba(20, 36, 22, 0.4);
+  transition: background 0.2s, color 0.2s;
+}
+
+.float-check .check-dot {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--cat);
+  color: #fff;
+}
+
+.float-check.on {
+  background: var(--cat);
+  border-color: transparent;
+  color: #fff;
+}
+
+.float-check.on .check-dot {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.75);
+  animation: dot-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+@keyframes dot-pop {
+  from {
+    transform: scale(0.6);
+  }
+}
+
+/* ---------- הגופן החם ---------- */
+.voice {
+  font-family: var(--voice);
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.bm-text.voice {
+  color: var(--text);
+  font-size: 21px;
+  line-height: 1.5;
+  max-width: 24ch;
+  margin: 0 auto 16px !important;
+}
+
+.prayer.voice {
+  font-size: 21px;
+  line-height: 1.55;
+  color: var(--cat-ink);
+  text-align: center;
+  margin: 2px auto 6px;
+  max-width: 26ch;
+}
+
+/* ---------- הקריאה: שם הקטגוריה בכמוסה, שם הקריאה ככותרת אמיתית ---------- */
+.read-title {
+  font-size: 23px !important;
+  margin-bottom: 10px !important;
+  text-wrap: balance;
+}
+
+.read-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.read-meta .page-chip {
+  margin: 0;
+  background: var(--cat-soft, var(--green-soft));
+  color: var(--cat-ink, var(--green-deep));
+}
+
+.read-meta .draft-badge {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 1px 9px;
+}
+
+.reading {
+  text-wrap: pretty;
+}
+
+/* ---------- סדר היום: עקבה בצבע של כל צעד ---------- */
+.flow-head b {
+  display: block;
+  font-size: 17px;
+}
+
+.flow-ring .fill {
+  stroke: var(--green-bright);
+}
+
+.flow-step.next .flow-foot {
+  color: var(--cat);
+  opacity: 0.45;
+}
+
+.flow-step.done .flow-foot {
+  color: var(--cat);
+  opacity: 1;
+  animation: foot-stamp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.flow-step.done {
+  color: var(--cat-ink);
+}
+
+@keyframes foot-stamp {
+  0% {
+    transform: scale(1.35);
+  }
+  60% {
+    transform: scale(0.94);
+  }
+}
+
+/* ---------- האתגר ---------- */
+.challenge {
+  gap: 12px;
+}
+
+.challenge-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: center;
+}
+
+.challenge-head b {
+  grid-column: 1;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.challenge-head .small {
+  grid-column: 1;
+}
+
+.challenge-count {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-family: var(--display);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--cat-ink);
+  direction: ltr;
+}
+
+.challenge-segs i.on,
+.challenge .bar > span {
+  background: var(--cat);
+}
+
+.challenge-segs i.today {
+  background: var(--cat-soft);
+  box-shadow: inset 0 0 0 2px var(--cat);
+}
+
+.challenge-segs i {
+  transition: background 0.4s;
+}
+
+/* ---------- השאלון: שאלות ממוספרות, שבירת שורות מאוזנת, ריווח צמוד ---------- */
+.q {
+  margin-bottom: 20px;
+}
+
+.q label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: var(--voice);
+  font-weight: 500;
+  font-size: 18.5px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.q-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -1px;
+  border-radius: 50%;
+  background: var(--cat, var(--green));
+  color: #fff;
+  font: 700 14px/1 var(--font);
+}
+
+.q-text {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.questionnaire textarea {
+  min-height: 92px;
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgba(20, 36, 22, 0.06);
+}
+
+.questionnaire textarea:focus {
+  border-color: var(--cat);
+}
+
+/* ---------- טקסט קטן: ריווח שורות צמוד, ושורה משלו מתחת לכותרת מודגשת ---------- */
+.small {
+  line-height: 1.45;
+}
+
+b + .small,
+br + .small {
+  display: block;
+}
+
+/* ---------- הצעידה: לוח במרכז המסך, וכותרות בצבע של הצעד ---------- */
+.walk-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.walk-stage {
+  width: 100%;
+}
+
+.walk-stage.walk-center {
+  margin: auto;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.walk-center .walk-kicker {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.walk-title {
+  color: var(--cat-ink, var(--green-deep));
+}
+
+/* מעל הכותרת: שם הצעד בצבע שלו (בהתחייבות ובתפילה זו הברכה, באפור) */
+.walk-stage:not(.walk-center) .walk-kicker {
+  color: var(--cat-ink, var(--muted));
+}
+
+.walk-panel {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+  padding: 30px 20px 24px;
+  text-align: center;
+}
+
+.walk-panel .card-tag-wrap {
+  /* ריפוד (30) + מסגרת (1) + חצי גובה (17) */
+  margin: -48px 0 18px;
+}
+
+.walk-panel .walk-big {
+  margin: 0 auto;
+  max-width: 22ch;
+  font-size: 25px;
+  line-height: 1.5;
+}
+
+.walk-panel .walk-prayer {
+  padding: 0;
+  color: var(--cat-ink);
+}
+
+.walk-panel .done-state {
+  justify-content: center;
+  margin-top: 14px;
+  color: var(--cat-ink);
+}
+
+.walk-stage .read-meta .page-chip {
+  font-size: 14px;
+}
+
+/* ---------- פתיחה: עקבות שנכנסות, החוגה מתמלאת והכרטיסים עולים בעדינות. פעם אחת בכל פתיחה ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  [data-intro] .feet svg {
+    animation: intro-foot 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  }
+
+  [data-intro] .feet svg:nth-child(2) {
+    animation-delay: 0.25s;
+  }
+
+  [data-intro] .dial line {
+    animation: intro-tick 0.4s ease backwards;
+    animation-delay: calc(0.15s + var(--i, 0) * 22ms);
+  }
+
+  [data-intro] .hero-step,
+  [data-intro] .hero-principle,
+  [data-intro] .walk-cta {
+    animation: intro-rise 0.6s ease backwards;
+    animation-delay: 0.35s;
+  }
+
+  [data-intro] .stack > * {
+    animation: intro-rise 0.5s ease backwards;
+  }
+
+  [data-intro] .stack > :nth-child(1) {
+    animation-delay: 0.45s;
+  }
+
+  [data-intro] .stack > :nth-child(2) {
+    animation-delay: 0.53s;
+  }
+
+  [data-intro] .stack > :nth-child(3) {
+    animation-delay: 0.61s;
+  }
+
+  [data-intro] .stack > :nth-child(n + 4) {
+    animation-delay: 0.69s;
+  }
+}
+
+@keyframes intro-foot {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+
+@keyframes intro-tick {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-check.on .check-dot,
+  .flow-step.done .flow-foot {
+    animation: none;
+  }
+}
+
+/* כרטיסים שהם עמודה עם רווח קבוע: הרווח כבר נותן את המרחק מתחת לכמוסה */
+.challenge > .card-tag-wrap,
+.tracker-summary > .card-tag-wrap {
+  margin-bottom: 0;
+}
+
+/* ---------- היומן: צבעי משנה עדינים (מספרים, כותרות קטנות ופסים), הירוק נשאר הראשי ---------- */
+.stats .stat[class*='cat-'] b {
+  color: var(--cat-ink);
+}
+
+.stats .stat[class*='cat-'] {
+  box-shadow: inset 0 3px 0 var(--cat), var(--shadow-card);
+}
+
+.card[class*='cat-'] > .card-label {
+  color: var(--cat-ink);
+}
+
+.card[class*='cat-'] .hbar .bar > span {
+  background: var(--cat);
+}
+
+/* סימן "הושלם" ביומן, וקישור עם חץ */
+.entry-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--green-deep);
+  font-weight: 600;
+}
+
+.link-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}

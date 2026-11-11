@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { TitleMark } from './Brand';
 import { Sheet } from './Sheet';
+import { I } from './Icons';
 import { haptic, toast } from '../lib/feedback';
 import { checkPin, makeLock, RELOCK_AFTER } from '../lib/lock';
 import { resetAll, setState, useAppState } from '../lib/store';
@@ -219,7 +220,10 @@ export function LockSettings() {
       </p>
       {s.lock ? (
         <div className="row">
-          <span className="pill ok">✓ הנעילה פעילה</span>
+          <span className="pill ok">
+            {I.check({ size: 15 })}
+            הנעילה פעילה
+          </span>
           <button
             className="btn btn-ghost"
             onClick={() => {

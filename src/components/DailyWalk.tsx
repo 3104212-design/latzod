@@ -106,6 +106,8 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
 
   let title: string;
   let kicker: ReactNode = null;
+  // התחייבות ותפילה: לוח במרכז המסך, עם הכותרת בכמוסה צבעונית (רגע אחד, בלי גלילה)
+  let panel: ReactNode = null;
   let main: ReactNode;
   let actions: ReactNode;
 
@@ -113,9 +115,10 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
     case 0:
       title = 'רק להיום · 24 שעות';
       kicker = greeting(s.name);
+      panel = I.sun({ size: 18 });
       main = (
         <>
-          <p className="walk-big">{content.step.commitment}</p>
+          <p className="walk-big voice">{content.step.commitment}</p>
           {rec.checkin && (
             <p className="done-state">
               {I.check({ size: 20 })} ההתחייבות נרשמה ב-{timeOf(rec.checkin)}
@@ -136,17 +139,17 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
 
     case 1:
       title = content.title ?? 'הקריאה היומית';
-      kicker = (
-        <>
-          הקריאה היומית
-          {content.isDraft && <span className="draft-badge">טיוטה</span>}
-        </>
-      );
+      kicker = 'הקריאה היומית';
       main = (
         <>
-          {content.page != null && (
-            <div className="page-chip">
-              בספר: {content.bookDate ? `${content.bookDate} · ` : ''}עמוד {content.page}
+          {(content.page != null || content.isDraft) && (
+            <div className="read-meta">
+              {content.page != null && (
+                <span className="page-chip">
+                  בספר: {content.bookDate ? `${content.bookDate} · ` : ''}עמוד {content.page}
+                </span>
+              )}
+              {content.isDraft && <span className="draft-badge">טיוטה</span>}
             </div>
           )}
           {content.reading ? (
@@ -224,7 +227,8 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
 
     case 3:
       title = 'תפילה להיום';
-      main = <p className="walk-big walk-prayer">{content.prayer}</p>;
+      panel = I.heart({ size: 18 });
+      main = <p className="walk-big walk-prayer voice">{content.prayer}</p>;
       actions = rec.prayed ? (
         <button className="btn btn-primary walk-next" onClick={forward}>
           הלאה
@@ -300,14 +304,31 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
       </header>
 
       <div className="walk-body" ref={body}>
-        <div className="walk-stage" key={`${stage}-${q}`}>
+        <div
+          className={`walk-stage${stage < END ? ` cat-${FLOW[stage].cat}` : ''}${panel ? ' walk-center' : ''}`}
+          key={`${stage}-${q}`}
+        >
           {kicker && <p className="walk-kicker">{kicker}</p>}
-          {title && (
-            <h2 className="walk-title" ref={head} tabIndex={-1}>
-              {title}
-            </h2>
+          {panel ? (
+            <div className={`walk-panel cat cat-${FLOW[stage].cat}`}>
+              <div className="card-tag-wrap">
+                <h2 className="card-tag" ref={head} tabIndex={-1}>
+                  {panel}
+                  <span>{title}</span>
+                </h2>
+              </div>
+              {main}
+            </div>
+          ) : (
+            <>
+              {title && (
+                <h2 className="walk-title" ref={head} tabIndex={-1}>
+                  {title}
+                </h2>
+              )}
+              {main}
+            </>
           )}
-          {main}
         </div>
       </div>
 

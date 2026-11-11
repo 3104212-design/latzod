@@ -36,6 +36,17 @@ function useToday() {
 export function App() {
   // פס המצב באייפון: מטופל בתגית apple-mobile-web-app-status-bar-style="default" ב-index.html,
   // שבה הטלפון מצייר פס אטום משלו. אין רצועה משלנו, כי היא הבהבה בגלילה.
+  useEffect(() => {
+    // מסך הפתיחה (index.html) נעלם כשהאפליקציה עולה, אחרי ששתי העקבות הספיקו להיכנס
+    const sp = document.getElementById('splash');
+    if (!sp) return;
+    const t1 = setTimeout(() => sp.classList.add('out'), Math.max(0, 850 - performance.now()));
+    const t2 = setTimeout(() => sp.remove(), Math.max(0, 850 - performance.now()) + 400);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
   return (
     <>
       <DocumentSync />

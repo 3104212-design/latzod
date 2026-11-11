@@ -3,6 +3,7 @@
 
 import { pledgeStreak } from './Insights';
 import { I } from './Icons';
+import { CardTag } from './CardTag';
 import { todayISO } from '../lib/dates';
 import { useAppState } from '../lib/store';
 
@@ -23,13 +24,13 @@ export function PledgeChallenge() {
   const goal = GOALS.find((g) => g.days > streak);
   if (!goal) {
     return (
-      <div className="card challenge">
+      <div className="card challenge cat cat-challenge">
+        <CardTag icon={I.trophy({ size: 18 })} as="p">
+          אתגר
+        </CardTag>
         <div className="challenge-head">
-          <span className="challenge-ic">{I.trophy()}</span>
-          <span>
-            <b>שנה שלמה של "רק להיום"</b>
-            <span className="muted small">{streak.toLocaleString('he-IL')} ימים ברצף. כל יום נוסף הוא מתנה.</span>
-          </span>
+          <b>שנה שלמה של "רק להיום"</b>
+          <span className="muted small">{streak.toLocaleString('he-IL')} ימים ברצף. כל יום נוסף הוא מתנה.</span>
         </div>
       </div>
     );
@@ -44,15 +45,20 @@ export function PledgeChallenge() {
         : `עוד ${left} התחייבויות ל${goal.label}.`;
   const label = `${streak} מתוך ${goal.days}`;
   return (
-    <div className="card challenge">
+    <div className="card challenge cat cat-challenge">
+      <CardTag icon={I.trophy({ size: 18 })} as="p">
+        אתגר
+      </CardTag>
       <div className="challenge-head">
-        <span className="challenge-ic">{I.trophy()}</span>
-        <span>
-          <b>אתגר: {goal.label} של "רק להיום"</b>
-          <span className="muted small">
-            {text}
-            {!pledgedToday && streak > 0 ? ' ההתחייבות של היום שומרת על הרצף.' : ''}
-          </span>
+        <b>
+          {goal.label} של "רק להיום"
+        </b>
+        <span className="muted small">
+          {text}
+          {!pledgedToday && streak > 0 ? ' ההתחייבות של היום שומרת על הרצף.' : ''}
+        </span>
+        <span className="challenge-count" aria-hidden="true">
+          {streak}/{goal.days}
         </span>
       </div>
       {segments ? (

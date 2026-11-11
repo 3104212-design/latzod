@@ -5,12 +5,13 @@ import { celebrate } from './feedback';
 import type { ISODate } from './dates';
 import { updateDay, type DayRecord } from './store';
 
+/** cat: צבע המשנה של הצעד (מחלקות .cat-* ב-styles-v24.css), בכרטיס, בכותרת ובעקבה */
 export const FLOW = [
-  { id: 'sec-pledge', label: 'התחייבות', short: 'התחייבות' },
-  { id: 'sec-read', label: 'קריאה', short: 'קריאה' },
-  { id: 'sec-questions', label: 'שאלון', short: 'שאלון' },
-  { id: 'sec-prayer', label: 'תפילה', short: 'תפילה' },
-  { id: 'sec-review', label: 'סיכום ערב', short: 'סיכום' },
+  { id: 'sec-pledge', cat: 'pledge', label: 'התחייבות', short: 'התחייבות' },
+  { id: 'sec-read', cat: 'read', label: 'קריאה', short: 'קריאה' },
+  { id: 'sec-questions', cat: 'questions', label: 'שאלון', short: 'שאלון' },
+  { id: 'sec-prayer', cat: 'prayer', label: 'תפילה', short: 'תפילה' },
+  { id: 'sec-review', cat: 'review', label: 'סיכום ערב', short: 'סיכום' },
 ] as const;
 
 /** לכל אחד מחמשת הצעדים: האם נעשה */

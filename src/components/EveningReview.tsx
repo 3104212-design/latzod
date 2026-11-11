@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { ChipPicker } from './Sheet';
+import { Scale } from './Scale';
+import { CardTag } from './CardTag';
+import { I } from './Icons';
 import type { ISODate } from '../lib/dates';
 import { MOODS, TRIGGERS } from '../lib/sobriety';
 import { haptic } from '../lib/feedback';
@@ -28,10 +31,15 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
   if (saved && !editing) {
     const m = MOODS.find((x) => x.value === saved.mood);
     return (
-      <div className="card review">
-        <p className="card-label">סיכום היום</p>
+      <div className="card review cat cat-review">
+        <CardTag icon={I.moon({ size: 18 })} as="p">
+          סיכום היום
+        </CardTag>
         <div className="review-summary">
-          <span className={`pill ${saved.clean ? 'ok' : 'warn'}`}>{saved.clean ? '✓ היום עבר נקי' : 'היום הייתה מעידה'}</span>
+          <span className={`pill ${saved.clean ? 'ok' : 'warn'}`}>
+            {saved.clean && I.check({ size: 15 })}
+            {saved.clean ? 'היום עבר נקי' : 'היום הייתה מעידה'}
+          </span>
           {m && (
             <span className="pill">
               {m.emoji} {m.label}
@@ -57,8 +65,10 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
   }
 
   return (
-    <div className="card review">
-      <p className="card-label">סיכום היום</p>
+    <div className="card review cat cat-review">
+      <CardTag icon={I.moon({ size: 18 })} as="p">
+        סיכום היום
+      </CardTag>
       <p className="muted small">דקה בסוף היום: איך זה הלך?</p>
 
       <div className="field">
@@ -96,14 +106,7 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
         <label htmlFor={`crv-${date}`}>
           עוצמת הדחף היום: <b>{craving}</b>/10
         </label>
-        <input
-          id={`crv-${date}`}
-          type="range"
-          min={0}
-          max={10}
-          value={craving}
-          onChange={(e) => setCraving(Number(e.target.value))}
-        />
+        <Scale id={`crv-${date}`} min={0} max={10} value={craving} onChange={setCraving} low="בלי דחף" high="חזק מאוד" />
       </div>
 
       <div className="field">

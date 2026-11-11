@@ -57,21 +57,21 @@ export function Insights() {
   return (
     <>
       <div className="stats">
-        <div className="card stat">
+        <div className="card stat cat-challenge">
           <b>{pledgeStreak(s)}</b>
           <span>רצף התחייבויות</span>
         </div>
-        <div className="card stat">
+        <div className="card stat cat-pledge">
           <b>{doneDays}</b>
           <span>ימים שהושלמו</span>
         </div>
-        <div className="card stat">
+        <div className="card stat cat-review">
           <b>{reviews.filter((r) => r.clean).length}</b>
           <span>ימים נקיים שסוכמו</span>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card cat-review">
         <p className="card-label">מצב הרוח בשבועיים האחרונים</p>
         <div className="mood-strip">
           {last14.map((d) => {
@@ -96,7 +96,7 @@ export function Insights() {
         </p>
       </div>
 
-      <div className="card">
+      <div className="card cat-questions">
         <p className="card-label">מה מפעיל אותי</p>
         {top.length ? (
           <div className="hbars">
@@ -116,7 +116,7 @@ export function Insights() {
       </div>
 
       {s.cravings.length > 0 && (
-        <div className="card">
+        <div className="card cat-prayer">
           <p className="card-label">מתי הדחפים מגיעים</p>
           <div className="hbars">
             {PARTS.map((p, i) => (

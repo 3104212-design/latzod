@@ -64,6 +64,7 @@ export function Dial({ total, states, current, children, label }: DialProps) {
         strokeWidth={isCur ? 6 : st === 'done' ? 5 : 3}
         strokeLinecap="round"
         opacity={isCur || st === 'done' ? 1 : st === 'checked' ? 0.7 : 0.32}
+        style={{ '--i': i } as CSSProperties}
       />
     );
   });

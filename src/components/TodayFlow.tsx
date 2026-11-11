@@ -3,6 +3,8 @@
 import { FLOW, flowState } from '../lib/day';
 import type { DayRecord } from '../lib/store';
 import { FootIcon } from './Visuals';
+import { CardTag } from './CardTag';
+import { I } from './Icons';
 
 export function TodayFlow({ rec }: { rec: DayRecord }) {
   const st = flowState(rec);
@@ -22,7 +24,10 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
   };
 
   return (
-    <nav className="card flow" aria-label="סדר היום">
+    <nav className="card flow cat cat-flow" aria-label="סדר היום">
+      <CardTag icon={I.list({ size: 18 })} as="p">
+        סדר היום
+      </CardTag>
       <div className="flow-head">
         <svg className="flow-ring" viewBox="0 0 56 56" aria-hidden="true">
           <circle cx="28" cy="28" r={r} className="track" />
@@ -32,10 +37,8 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
           {n}/5
         </span>
         <span>
-          <b>{n === 5 ? 'סדר היום הושלם' : 'סדר היום'}</b>
-          <span className="muted small" style={{ display: 'block' }}>
-            {n === 5 ? 'כל החמישה נעשו. כל הכבוד.' : nextIdx >= 0 ? `הבא בתור: ${FLOW[nextIdx].label}` : ''}
-          </span>
+          <b>{n === 5 ? 'הכל נעשה היום' : `הבא בתור: ${FLOW[nextIdx].label}`}</b>
+          <span className="muted small">{n === 5 ? 'כל החמישה נעשו. כל הכבוד.' : 'לוחצים על עקבה כדי לעבור אליה'}</span>
         </span>
       </div>
       <ol className="flow-steps">
@@ -43,7 +46,7 @@ export function TodayFlow({ rec }: { rec: DayRecord }) {
           <li key={f.id}>
             <button
               type="button"
-              className={`flow-step${st[i] ? ' done' : ''}${i === nextIdx ? ' next' : ''}`}
+              className={`flow-step cat-${f.cat}${st[i] ? ' done' : ''}${i === nextIdx ? ' next' : ''}`}
               onClick={() => go(f.id)}
               aria-label={`${f.label}: ${st[i] ? 'נעשה' : 'עוד לא'}`}
             >

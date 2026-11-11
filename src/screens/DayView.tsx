@@ -18,6 +18,7 @@ import { DailyWalk } from '../components/DailyWalk';
 import { WelcomeBack } from '../components/WelcomeBack';
 import { WeekReadyCard, WeekSheet } from '../components/WeekSummary';
 import { FootIcon } from '../components/Visuals';
+import { CardTag, FloatCheck } from '../components/CardTag';
 import { I } from '../components/Icons';
 import { FLOW, flowState, greeting, nextFlowIndex, updateWithFlow } from '../lib/day';
 import { celebrate, haptic } from '../lib/feedback';
@@ -166,9 +167,9 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
         {isToday && <WelcomeBack />}
         {isToday && <WeekReadyCard onOpen={() => setWeek(true)} />}
 
-        <div className="card commit" id="sec-pledge">
-          <div className="commit-title">רק להיום · 24 שעות</div>
-          <p className="bm-text">{content.step.commitment}</p>
+        <div className="card commit cat cat-pledge" id="sec-pledge">
+          <CardTag icon={I.sun({ size: 18 })}>רק להיום · 24 שעות</CardTag>
+          <p className="bm-text voice">{content.step.commitment}</p>
           {isToday &&
             (rec.checkin ? (
               <div className="done-state">
@@ -199,30 +200,32 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
         {isToday && s.reasons.length > 0 && <ReasonOfTheDay date={date} />}
 
         {pos.day === 1 && (
-          <div className="card opener">
-            <p className="card-label">פותחים את {content.step.name}</p>
+          <div className="card opener cat cat-pledge">
+            <CardTag icon={I.sparkle({ size: 18 })} as="p">פותחים את {content.step.name}</CardTag>
             <p className="motto">{content.step.motto}</p>
             <p>{content.step.intro}</p>
           </div>
         )}
 
-        <div className="card">
-          <p className="card-label">הצעד של החודש{monthName ? ` · ${monthName}` : ''}</p>
+        <div className="card cat cat-pledge">
+          <CardTag icon={I.flag({ size: 18 })} as="p">הצעד של החודש{monthName ? ` · ${monthName}` : ''}</CardTag>
           <p className="step-text">{content.step.text}</p>
-          <a href={`#/step/${pos.step}`} className="small">
-            לכל הצעד ולמפת הימים ›
+          <a href={`#/step/${pos.step}`} className="small link-go">
+            לכל הצעד ולמפת הימים {I.forward({ size: 14 })}
           </a>
         </div>
 
-        <div className="card" id="sec-read">
-          <p className="card-label">
-            הקריאה היומית
-            {content.isDraft && <span className="draft-badge">טיוטה</span>}
-          </p>
-          {content.title && <h2>{content.title}</h2>}
-          {content.page != null && (
-            <div className="page-chip">
-              בספר: {content.bookDate ? `${content.bookDate} · ` : ''}עמוד {content.page}
+        <div className={`card cat cat-read${!isFuture ? ' has-float' : ''}`} id="sec-read">
+          <CardTag icon={I.book({ size: 18 })} as="p">הקריאה היומית</CardTag>
+          {content.title && <h2 className="read-title">{content.title}</h2>}
+          {(content.page != null || content.isDraft) && (
+            <div className="read-meta">
+              {content.page != null && (
+                <span className="page-chip">
+                  בספר: {content.bookDate ? `${content.bookDate} · ` : ''}עמוד {content.page}
+                </span>
+              )}
+              {content.isDraft && <span className="draft-badge">טיוטה</span>}
             </div>
           )}
           {content.reading && <p className="reading">{content.reading}</p>}
@@ -242,29 +245,26 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
             <p className="muted small draft-note">טקסט זמני שנכתב במיוחד לאפליקציה. יוחלף בקריאה מהספר.</p>
           )}
           {!isFuture && (
-            <button
-              type="button"
-              className={`check-btn${rec.read ? ' on' : ''}`}
-              aria-pressed={!!rec.read}
-              onClick={() => {
-                haptic(10);
-                updateWithFlow(date, (d) => ({ ...d, read: !d.read }), true);
-              }}
-            >
-              <span className="check-dot" aria-hidden="true">
-                {rec.read && I.check({ size: 16 })}
-              </span>
-              {rec.read ? 'קראתי' : 'סימון: קראתי'}
-            </button>
+            <FloatCheck
+              on={!!rec.read}
+              label="קראתי"
+              doneLabel="קראתי"
+              onToggle={() => updateWithFlow(date, (d) => ({ ...d, read: !d.read }), true)}
+            />
           )}
         </div>
 
-        <div className="card questionnaire" id="sec-questions">
-          <p className="card-label">שאלון להיום</p>
+        <div className="card questionnaire cat cat-questions" id="sec-questions">
+          <CardTag icon={I.pen({ size: 18 })}>שאלון להיום</CardTag>
           {isFuture && <p className="muted small">השאלון ייפתח ביום הזה. רק להיום.</p>}
           {questions.map((q, i) => (
             <div className="q" key={i}>
-              <label htmlFor={`q-${i}`}>{q}</label>
+              <label htmlFor={`q-${i}`}>
+                <span className="q-num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <span className="q-text">{q}</span>
+              </label>
               <textarea
                 id={`q-${i}`}
                 value={rec.answers?.[i] ?? ''}
@@ -274,7 +274,12 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
             </div>
           ))}
           <div className="q">
-            <label htmlFor="note">מה עוד עולה בי היום?</label>
+            <label htmlFor="note">
+              <span className="q-num" aria-hidden="true">
+                {I.pen({ size: 14 })}
+              </span>
+              <span className="q-text">מה עוד עולה בי היום?</span>
+            </label>
             <textarea
               id="note"
               value={rec.note ?? ''}
@@ -285,24 +290,16 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
           <p className="saved-hint">נשמר אוטומטית, ורק במכשיר הזה.</p>
         </div>
 
-        <div className="card" id="sec-prayer">
-          <p className="card-label">תפילה להיום</p>
-          <p className="prayer">{content.prayer}</p>
+        <div className={`card cat cat-prayer${!isFuture ? ' has-float' : ''}`} id="sec-prayer">
+          <CardTag icon={I.heart({ size: 18 })}>תפילה להיום</CardTag>
+          <p className="prayer voice">{content.prayer}</p>
           {!isFuture && (
-            <button
-              type="button"
-              className={`check-btn${rec.prayed ? ' on' : ''}`}
-              aria-pressed={!!rec.prayed}
-              onClick={() => {
-                haptic(10);
-                updateWithFlow(date, (d) => ({ ...d, prayed: !d.prayed }), true);
-              }}
-            >
-              <span className="check-dot" aria-hidden="true">
-                {rec.prayed && I.check({ size: 16 })}
-              </span>
-              {rec.prayed ? 'אמן. אמרתי את התפילה' : 'סימון: אמרתי את התפילה'}
-            </button>
+            <FloatCheck
+              on={!!rec.prayed}
+              label="אמרתי את התפילה"
+              doneLabel="אמן. אמרתי"
+              onToggle={() => updateWithFlow(date, (d) => ({ ...d, prayed: !d.prayed }), true)}
+            />
           )}
         </div>
 

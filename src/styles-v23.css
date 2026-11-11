@@ -18,7 +18,7 @@
   color: var(--green);
 }
 
-/* כפתור סימון (קראתי, אמרתי את התפילה): עיגול שמתמלא */
+/* העיגול שבכפתור הסימון (FloatCheck: קראתי, אמרתי את התפילה) */
 .check-dot {
   display: grid;
   place-items: center;
@@ -27,12 +27,6 @@
   border-radius: 50%;
   border: 2px solid currentColor;
   flex: none;
-}
-
-.check-btn.on .check-dot {
-  background: var(--on-green);
-  border-color: var(--on-green);
-  color: var(--green);
 }
 
 /* ---------- מסך הספירה ---------- */
@@ -373,6 +367,6 @@
 }
 
 /* בצעידה, לסיכום הערב כבר יש כותרת בראש המסך: בלי הכותרת הקטנה של הכרטיס */
-.walk .review > .card-label {
+.walk .review > .card-tag-wrap {
   display: none;
 }
