@@ -7,22 +7,6 @@ html {
   text-size-adjust: 100%;
 }
 
-/* רצועה שמכסה את האזור שמתחת לפס המצב (שעה, סוללה) כשהאפליקציה במסך מלא */
-.statusbar-cover {
-  position: fixed;
-  top: 0;
-  inset-inline: 0;
-  height: env(safe-area-inset-top, 0px);
-  z-index: 45;
-  background: var(--bg);
-  pointer-events: none;
-  transition: background 0.2s;
-}
-
-.statusbar-cover.hero {
-  background: var(--hero);
-}
-
 /* שדות תאריך ושעה: ב-Safari יש להם רוחב מינימלי משלהם, והם חרגו מהכרטיס */
 input[type='date'],
 input[type='time'],
