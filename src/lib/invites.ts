@@ -6,8 +6,11 @@ import { getState, setState } from './store';
 
 const CLOUD = 'https://latzod.64-176-173-124.sslip.io';
 
+/** הכתובת של הדף בלי ה-hash, ובלי // כפול בנתיב (כתובת כמו "…//#/" שלחה את הבקשות ל-//api, שהשרת לא מכיר) */
+const pageBase = () => location.origin + location.pathname.replace(/\/{2,}/g, '/');
+
 /** בענן ובפיתוח: אותה כתובת. ב-GitHub Pages: השירות שבענן */
-export const API = location.hostname.endsWith('github.io') ? `${CLOUD}/api` : new URL('./api', location.href.split('#')[0]).href;
+export const API = location.hostname.endsWith('github.io') ? `${CLOUD}/api` : new URL('./api', pageBase()).href;
 
 export type InviteError = 'used' | 'invalid' | 'network' | 'slow-down' | 'not-admin' | 'bad-code' | 'server';
 
@@ -43,7 +46,7 @@ async function call<T>(method: string, path: string, body?: unknown, auth?: stri
 
 /** הכתובת של האפליקציה עצמה (בענן או ב-GitHub Pages, לפי איפה שהיא פתוחה) */
 export function appLink(): string {
-  return new URL('./', location.href.split('#')[0]).href;
+  return new URL('./', pageBase()).href;
 }
 
 export const inviteLink = (code: string) => `${appLink()}#/join/${code}`;
