@@ -1,6 +1,6 @@
 // מסך הספירה: ימים נקיים, חיסכון, אבני דרך, רצפים, וסיבות אישיות לדרך.
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TopBar } from '../components/Chrome';
 import { ChipPicker, Sheet } from '../components/Sheet';
 import { Dial, Feet } from '../components/Visuals';
@@ -94,18 +94,9 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
             now={now}
             onEdit={() => setEdit(t)}
             onRestart={() => setRestart(t)}
-            onShare={async (days, withName) => {
-              try {
-                const blob = await renderShareImage({
-                  days,
-                  label: days === 1 ? 'יום נקי' : 'ימים נקיים',
-                  subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
-                });
-                const r = await shareImage(blob, `${daysLabel(days)} נקיים. רק להיום.`);
-                if (r === 'downloaded') toast('התמונה נשמרה במכשיר. אפשר לשלוח אותה לכל מי שתרצו.');
-              } catch {
-                toast('לא הצלחנו ליצור את התמונה.');
-              }
+            onShare={async (blob, days) => {
+              const r = await shareImage(blob, `${daysLabel(days)} נקיים. רק להיום.`);
+              if (r === 'downloaded') toast('התמונה נשמרה במכשיר. אפשר לשלוח אותה לכל מי שתרצו.');
             }}
           />
         )}
@@ -148,11 +139,27 @@ function TrackerView({
   now: number;
   onEdit: () => void;
   onRestart: () => void;
-  onShare: (days: number, withName: boolean) => void;
+  onShare: (blob: Blob, days: number) => void;
 }) {
   const [withName, setWithName] = useState(false);
   const ms = elapsedMs(t.since, now);
   const b = breakdown(ms);
+  // התמונה מוכנה מראש, כדי שתפריט השיתוף ייפתח ישירות מהלחיצה (אייפון דורש זאת)
+  const [shareBlob, setShareBlob] = useState<Blob | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setShareBlob(null);
+    renderShareImage({
+      days: b.days,
+      label: b.days === 1 ? 'יום נקי' : 'ימים נקיים',
+      subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
+    })
+      .then((blob) => alive && setShareBlob(blob))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [b.days, withName, t.name]);
   const next = nextMilestone(ms);
   const best = longestMs(t, now);
   const ticks = Array.from({ length: 24 }, (_, i) => (i < b.hours ? 'done' : 'none') as 'done' | 'none');
@@ -257,8 +264,12 @@ function TrackerView({
         <input type="checkbox" checked={withName} onChange={(e) => setWithName(e.target.checked)} />
       </label>
       <div className="row actions-row">
-        <button className="btn btn-primary" onClick={() => onShare(b.days, withName)}>
-          שיתוף תמונה
+        <button
+          className="btn btn-primary"
+          disabled={!shareBlob}
+          onClick={() => shareBlob && onShare(shareBlob, b.days)}
+        >
+          {shareBlob ? 'שיתוף תמונה' : 'מכינים תמונה…'}
         </button>
         <button className="btn btn-ghost" onClick={onEdit}>
           עריכה

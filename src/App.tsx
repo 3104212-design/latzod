@@ -30,8 +30,25 @@ function useToday() {
 }
 
 export function App() {
+  const s = useAppState();
+  const route = useRoute();
+  // בטלפונים עם מסך מלא (אייפון מותקן) התוכן נגלל מתחת לפס המצב. הרצועה הזו מכסה אותו בצבע המסך
+  const heroRoute = !s.onboarded || route.name === 'today' || route.name === 'day';
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    // הרצועה ירוקה כל עוד האזור הירוק נמצא מתחתיה, ובצבע הרקע אחרי שגוללים ממנו
+    const check = () => {
+      const h = document.querySelector('.hero, .onb-hero');
+      setPastHero(!!h && h.getBoundingClientRect().bottom < 60);
+    };
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
+  }, [route]);
+  const hero = heroRoute && !pastHero;
   return (
     <>
+      <div className={`statusbar-cover${hero ? ' hero' : ''}`} aria-hidden="true" />
       <DocumentSync />
       <LockGate>
         <Shell />

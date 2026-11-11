@@ -1,14 +1,14 @@
 :root {
-  /* הירוק של הכריכה, בגוון שעומד בניגודיות AA מול טקסט לבן */
-  --hero: #2f8135;
-  --hero-2: #3a9440;
-  --foot: rgba(255, 255, 255, 0.1);
-  --green: #2f8135;
+  /* הירוק של הכריכה */
+  --hero: #4fae52;
+  --hero-2: #64bb66;
+  --foot: rgba(255, 255, 255, 0.13);
+  --green: #3f9d43;
   --green-bright: #4fae52;
   --on-green: #ffffff;
-  --green-deep: #24692a;
+  --green-deep: #2b7a30;
   --green-soft: #e3f1e1;
-  --logo: #3a7d4c;
+  --logo: #4f9a62;
   --on-hero-chip: rgba(0, 0, 0, 0.2);
   --focus: #1a5ad7;
   --frame: #9fd3a6;

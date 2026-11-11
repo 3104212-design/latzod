@@ -6,6 +6,7 @@ import type { DayContent, Mode, TrackSettings } from './program';
 import { nowInputValue } from './dates';
 import { elapsedMs, reachedMilestone, uid, type Tracker } from './sobriety';
 import type { LockConfig } from './lock';
+import { saveFile } from './files';
 
 export interface DayRecord {
   /** מתי נרשמה ההתחייבות "רק להיום" */
@@ -243,14 +244,7 @@ export function useAppState(): AppState {
 /** מוריד קובץ JSON למכשיר */
 export function downloadJSON(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return saveFile(blob, filename);
 }
 
 /** קורא קובץ JSON שהמשתמש בחר */

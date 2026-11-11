@@ -7,7 +7,7 @@ import { useNow } from '../lib/hooks';
 import { renderShareImage, shareImage } from '../lib/shareImage';
 import { elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
 import { setState, useAppState } from '../lib/store';
-import { APP_VERSION, WHATS_NEW } from '../lib/version';
+import { APP_VERSION, releaseOf, WHATS_NEW } from '../lib/version';
 
 /** בודק פעם בדקה אם ספירה הגיעה לאבן דרך חדשה, וחוגג פעם אחת */
 export function MilestoneWatcher() {
@@ -22,20 +22,21 @@ export function MilestoneWatcher() {
         setState((st) => ({ ...st, celebrated: { ...st.celebrated, [t.id]: reached } }));
         const label = milestoneLabel(reached);
         const named = t.name && t.name !== 'ההתמכרות שלי' ? ` מ${t.name}` : '';
-        celebrate({
-          size: 'big',
-          title: `${label} נקיים${named}!`,
-          text: 'צעד אחר צעד, יום אחר יום. זה שלך, וזה אמיתי. רק להיום.',
-          share: async () => {
-            try {
-              const blob = await renderShareImage({ days: reached, label: reached === 1 ? 'יום נקי' : 'ימים נקיים', subtitle: label });
-              const r = await shareImage(blob, `${label} נקיים. רק להיום.`);
-              if (r === 'downloaded') toast('התמונה נשמרה במכשיר.');
-            } catch {
-              toast('לא הצלחנו ליצור את התמונה.');
-            }
-          },
-        });
+        const show = (blob: Blob | null) =>
+          celebrate({
+            size: 'big',
+            title: `${label} נקיים${named}!`,
+            text: 'צעד אחר צעד, יום אחר יום. זה שלך, וזה אמיתי. רק להיום.',
+            share: blob
+              ? async () => {
+                  const r = await shareImage(blob, `${label} נקיים. רק להיום.`);
+                  if (r === 'downloaded') toast('התמונה נשמרה במכשיר.');
+                }
+              : undefined,
+          });
+        renderShareImage({ days: reached, label: reached === 1 ? 'יום נקי' : 'ימים נקיים', subtitle: label })
+          .then(show)
+          .catch(() => show(null));
         break; // חגיגה אחת בכל פעם
       }
     }
@@ -47,10 +48,10 @@ export function MilestoneWatcher() {
 /** "מה חדש" אחרי עדכון גרסה */
 export function WhatsNew() {
   const s = useAppState();
-  if (!s.onboarded || s.seenVersion === APP_VERSION) return null;
+  if (!s.onboarded || releaseOf(s.seenVersion) === releaseOf(APP_VERSION)) return null;
   const close = () => setState((st) => ({ ...st, seenVersion: APP_VERSION }));
   return (
-    <Sheet title={`מה חדש בגרסה ${APP_VERSION.replace(/\.0$/, '')}`} onClose={close}>
+    <Sheet title={`מה חדש בגרסה ${releaseOf(APP_VERSION)}`} onClose={close}>
       <div className="card">
         <ul className="whats-new">
           {WHATS_NEW.map((w) => (
@@ -80,7 +81,7 @@ export function DocumentSync() {
 
     const apply = () => {
       const dark = s.theme === 'dark' || (s.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#24622a' : '#2f8135');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#24622a' : '#4FAE52');
     };
     apply();
     const mq = matchMedia('(prefers-color-scheme: dark)');

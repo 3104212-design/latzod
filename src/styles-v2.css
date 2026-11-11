@@ -54,17 +54,14 @@
 }
 
 .date-jump {
-  background: none;
-  border: none;
+  display: inline-block;
   color: inherit;
-  font: inherit;
   padding: 4px 12px;
   border-radius: 12px;
   min-height: var(--tap);
-  cursor: pointer;
 }
 
-.date-jump:hover {
+.date-jump-wrap:hover .date-jump {
   background: var(--on-hero-chip);
 }
 

@@ -42,8 +42,8 @@ function event(kind: string, time: string, title: string, body: string, url: str
     'DURATION:PT10M',
     'RRULE:FREQ=DAILY',
     `SUMMARY:${esc(title)}`,
-    `DESCRIPTION:${esc(`${body}\n${url}`)}`,
-    `URL:${url}`,
+    `DESCRIPTION:${esc(url ? `${body}\n${url}` : body)}`,
+    ...(url ? [`URL:${url}`] : []),
     'TRANSP:TRANSPARENT',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
@@ -78,4 +78,35 @@ export function downloadReminders(morning: string, evening: string) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+// ---------- אייפון: קבצים מוכנים בשרת ----------
+// באייפון, הורדת קובץ מתוך האפליקציה לא פותחת את היומן. במקום זה פותחים ב-Safari קובץ מוכן מהשרת,
+// ו-Safari מציע "הוספה ליומן". הקבצים נוצרים בזמן הבנייה, בחצאי שעות.
+
+function halfHours(from: number, to: number): string[] {
+  const out: string[] = [];
+  for (let h = from; h <= to; h += 0.5) out.push(`${pad(Math.floor(h))}:${h % 1 ? '30' : '00'}`);
+  return out;
+}
+
+export const MORNING_SLOTS = halfHours(5, 11.5);
+export const EVENING_SLOTS = halfHours(17, 23.5);
+
+const mins = (t: string) => {
+  const [h, m] = t.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+
+function nearest(t: string, slots: string[]): string {
+  return slots.reduce((best, s) => (Math.abs(mins(s) - mins(t)) < Math.abs(mins(best) - mins(t)) ? s : best), slots[0]);
+}
+
+export const slotFile = (m: string, e: string) => `reminders/m${m.replace(':', '')}-e${e.replace(':', '')}.ics`;
+
+/** הקובץ המוכן שהכי קרוב לשעות שנבחרו */
+export function reminderSlot(morning: string, evening: string) {
+  const m = nearest(morning, MORNING_SLOTS);
+  const e = nearest(evening, EVENING_SLOTS);
+  return { morning: m, evening: e, path: slotFile(m, e) };
 }

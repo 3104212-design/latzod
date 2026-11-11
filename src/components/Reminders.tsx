@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { toast } from '../lib/feedback';
-import { downloadReminders } from '../lib/reminders';
+import { isIOS } from '../lib/files';
+import { downloadReminders, reminderSlot } from '../lib/reminders';
 import { setState, useAppState } from '../lib/store';
 
 export function RemindersCard() {
@@ -29,9 +30,22 @@ export function RemindersCard() {
       <button
         className="btn btn-primary btn-block"
         onClick={() => {
-          downloadReminders(morning || '08:00', evening || '21:30');
-          setState((st) => ({ ...st, reminders: { morning, evening } }));
-          toast('הקובץ ירד. פותחים אותו ומאשרים הוספה ליומן.');
+          const m = morning || '08:00';
+          const e = evening || '21:30';
+          if (isIOS) {
+            // באייפון: Safari פותח את הקובץ המוכן ומציע "הוספה ליומן"
+            const slot = reminderSlot(m, e);
+            window.open(new URL(slot.path, location.href).href, '_blank');
+            setState((st) => ({ ...st, reminders: { morning: slot.morning, evening: slot.evening } }));
+            setMorning(slot.morning);
+            setEvening(slot.evening);
+            const rounded = slot.morning !== m || slot.evening !== e ? ` (עוגל ל-${slot.morning} ול-${slot.evening})` : '';
+            toast(`נפתח חלון ב-Safari. בוחרים שם "הוספת הכל" ליומן${rounded}.`);
+          } else {
+            downloadReminders(m, e);
+            setState((st) => ({ ...st, reminders: { morning: m, evening: e } }));
+            toast('הקובץ ירד. פותחים אותו ומאשרים הוספה ליומן.');
+          }
         }}
       >
         הוספה ליומן של הטלפון

@@ -1,0 +1,111 @@
+/* ======================================================================
+   תיקונים לאייפון (Safari ואפליקציה מותקנת)
+   ====================================================================== */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* רצועה שמכסה את האזור שמתחת לפס המצב (שעה, סוללה) כשהאפליקציה במסך מלא */
+.statusbar-cover {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 45;
+  background: var(--bg);
+  pointer-events: none;
+  transition: background 0.2s;
+}
+
+.statusbar-cover.hero {
+  background: var(--hero);
+}
+
+/* שדות תאריך ושעה: ב-Safari יש להם רוחב מינימלי משלהם, והם חרגו מהכרטיס */
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'],
+input[type='search'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--tap);
+  text-align: start;
+}
+
+input::-webkit-date-and-time-value {
+  text-align: start;
+  margin: 0;
+}
+
+input::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.row.times > .field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.field {
+  min-width: 0;
+}
+
+/* חלון תחתון לא נכנס מתחת לפס המצב */
+.sheet {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
+}
+
+/* טקסט קטן על הירוק הבהיר: צל עדין לקריאות טובה יותר */
+.hero,
+.counter-hero,
+.onb-hero,
+.lock-screen {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.hero .btn,
+.hero .icon-btn,
+.lock-screen .key {
+  text-shadow: none;
+}
+
+/* מעבר לתאריך: שדה התאריך שקוף ומונח מעל התאריך, כך שהלחיצה פותחת את הבורר גם באייפון */
+.date-jump-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.date-jump-input {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  opacity: 0;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.date-jump-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.date-jump-wrap:focus-within .date-jump {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}

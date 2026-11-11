@@ -1,3 +1,5 @@
+import { saveFile } from './files';
+
 // תמונת שיתוף: מספר הימים הנקיים על רקע ירוק, עם עקבות וטבעת סימונים כמו בכריכה.
 
 const W = 1080;
@@ -12,7 +14,8 @@ function footprint(g: CanvasRenderingContext2D, x: number, y: number, scale: num
   g.fillStyle = '#ffffff';
   g.fill(new Path2D('M60 0C96 0 118 30 118 74c0 38-14 64-18 86H20C16 138 2 112 2 74 2 30 24 0 60 0Z'));
   g.beginPath();
-  g.roundRect(18, 174, 84, 66, 26);
+  if (typeof g.roundRect === 'function') g.roundRect(18, 174, 84, 66, 26);
+  else g.ellipse(60, 207, 42, 33, 0, 0, Math.PI * 2);
   g.fill();
   g.restore();
 }
@@ -30,8 +33,8 @@ export async function renderShareImage(opts: { days: number; label: string; subt
 
   // רקע
   const grad = g.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#3a9440');
-  grad.addColorStop(1, '#2a7530');
+  grad.addColorStop(0, '#5bb65e');
+  grad.addColorStop(1, '#46a24a');
   g.fillStyle = grad;
   g.fillRect(0, 0, W, H);
 
@@ -95,13 +98,5 @@ export async function shareImage(blob: Blob, text: string): Promise<'shared' | '
   } catch (e) {
     if ((e as Error).name === 'AbortError') return 'cancelled';
   }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'latzod.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-  return 'downloaded';
+  return saveFile(blob, 'latzod.png');
 }

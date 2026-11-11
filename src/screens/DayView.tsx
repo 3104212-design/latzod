@@ -74,29 +74,29 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
   const dates = (
     <div className="hero-dates">
       {isToday && <span className="greeting">{greeting()}</span>}
-      <button
-        type="button"
-        className="date-jump"
-        aria-label={`${formatLong(date)}. מעבר לתאריך אחר`}
-        onClick={() => {
-          const el = dateInput.current;
-          if (!el) return;
-          if (typeof el.showPicker === 'function') el.showPicker();
-          else el.click();
-        }}
-      >
-        {formatLong(date)}
-        <span className="heb">{formatHebrew(date)}</span>
-      </button>
-      <input
-        ref={dateInput}
-        type="date"
-        className="sr-only"
-        tabIndex={-1}
-        aria-hidden="true"
-        value={date}
-        onChange={(e) => e.target.value && go(dayHref(e.target.value))}
-      />
+      {/* שדה התאריך שקוף ומונח מעל הטקסט: לחיצה פותחת את בורר התאריך של המכשיר, גם באייפון */}
+      <span className="date-jump-wrap">
+        <span className="date-jump" aria-hidden="true">
+          {formatLong(date)}
+          <span className="heb">{formatHebrew(date)}</span>
+        </span>
+        <input
+          ref={dateInput}
+          type="date"
+          className="date-jump-input"
+          aria-label={`${formatLong(date)}. מעבר לתאריך אחר`}
+          value={date}
+          onClick={(e) => {
+            const el = e.currentTarget;
+            try {
+              if (typeof el.showPicker === 'function') el.showPicker();
+            } catch {
+              /* אייפון פותח את הבורר לבד בלחיצה */
+            }
+          }}
+          onChange={(e) => e.target.value && go(dayHref(e.target.value))}
+        />
+      </span>
     </div>
   );
 
