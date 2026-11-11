@@ -5,7 +5,9 @@ import { TopBar } from '../components/Chrome';
 import { ChipPicker, Sheet } from '../components/Sheet';
 import { Dial, Feet } from '../components/Visuals';
 import { formatLong, nowInputValue, toISO } from '../lib/dates';
-import { compressImage, shareText, useNow } from '../lib/hooks';
+import { compressImage, useNow } from '../lib/hooks';
+import { celebrate, toast } from '../lib/feedback';
+import { renderShareImage, shareImage } from '../lib/shareImage';
 import {
   DAY_MS,
   MILESTONES,
@@ -45,12 +47,6 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
   const [selId, setSelId] = useState<string | undefined>();
   const [edit, setEdit] = useState<Tracker | 'new' | null>(null);
   const [restart, setRestart] = useState<Tracker | null>(null);
-  const [toast, setToast] = useState('');
-
-  const flash = (m: string) => {
-    setToast(m);
-    setTimeout(() => setToast(''), 2500);
-  };
 
   const t = s.trackers.find((x) => x.id === selId) ?? s.trackers[0];
 
@@ -63,12 +59,6 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
       </div>
 
       <div className="stack">
-        {toast && (
-          <div className="card commit" role="status">
-            {toast}
-          </div>
-        )}
-
         {s.trackers.length > 0 && (
           <div className="chips tracker-tabs" role="tablist">
             {s.trackers.map((x) => (
@@ -104,10 +94,18 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
             now={now}
             onEdit={() => setEdit(t)}
             onRestart={() => setRestart(t)}
-            onShare={async (text) => {
-              const r = await shareText('לצעוד לתוך היום', text);
-              if (r === 'copied') flash('הועתק. אפשר להדביק ולשלוח.');
-              if (r === 'failed') flash('השיתוף לא הצליח.');
+            onShare={async (days, withName) => {
+              try {
+                const blob = await renderShareImage({
+                  days,
+                  label: days === 1 ? 'יום נקי' : 'ימים נקיים',
+                  subtitle: withName && t.name !== 'ההתמכרות שלי' ? `מ${t.name}` : undefined,
+                });
+                const r = await shareImage(blob, `${daysLabel(days)} נקיים. רק להיום.`);
+                if (r === 'downloaded') toast('התמונה נשמרה במכשיר. אפשר לשלוח אותה לכל מי שתרצו.');
+              } catch {
+                toast('לא הצלחנו ליצור את התמונה.');
+              }
             }}
           />
         )}
@@ -131,7 +129,7 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
           onClose={() => setRestart(null)}
           onDone={() => {
             setRestart(null);
-            flash('הספירה התחילה מחדש. רק להיום.');
+            celebrate({ size: 'small', title: 'מתחילים שוב. רק להיום.' });
           }}
         />
       )}
@@ -150,8 +148,9 @@ function TrackerView({
   now: number;
   onEdit: () => void;
   onRestart: () => void;
-  onShare: (text: string) => void;
+  onShare: (days: number, withName: boolean) => void;
 }) {
+  const [withName, setWithName] = useState(false);
   const ms = elapsedMs(t.since, now);
   const b = breakdown(ms);
   const next = nextMilestone(ms);
@@ -177,14 +176,28 @@ function TrackerView({
       </section>
 
       <div className="stats">
-        <button className="card stat" onClick={t.costPerDay ? undefined : onEdit}>
-          <b>{t.costPerDay ? formatMoney(moneySaved(t, ms)) : '—'}</b>
-          <span>{t.costPerDay ? 'נחסכו' : 'להוסיף עלות יומית'}</span>
-        </button>
-        <button className="card stat" onClick={t.hoursPerDay ? undefined : onEdit}>
-          <b>{t.hoursPerDay ? formatHours(hoursSaved(t, ms)) : '—'}</b>
-          <span>{t.hoursPerDay ? 'של זמן חזרו אליי' : 'להוסיף שעות ביום'}</span>
-        </button>
+        {t.costPerDay ? (
+          <div className="card stat">
+            <b>{formatMoney(moneySaved(t, ms))}</b>
+            <span>נחסכו</span>
+          </div>
+        ) : (
+          <button className="card stat add" onClick={onEdit}>
+            <b>+ ₪</b>
+            <span>להוסיף עלות יומית</span>
+          </button>
+        )}
+        {t.hoursPerDay ? (
+          <div className="card stat">
+            <b>{formatHours(hoursSaved(t, ms))}</b>
+            <span>של זמן חזרו אליי</span>
+          </div>
+        ) : (
+          <button className="card stat add" onClick={onEdit}>
+            <b>+ שעות</b>
+            <span>להוסיף זמן ביום</span>
+          </button>
+        )}
         <div className="card stat">
           <b>{Math.floor(best / DAY_MS).toLocaleString('he-IL')}</b>
           <span>הרצף הארוך ביותר</span>
@@ -239,14 +252,13 @@ function TrackerView({
         </div>
       </div>
 
+      <label className="toggle share-name">
+        <span className="small">להציג בתמונת השיתוף ממה מתנקים</span>
+        <input type="checkbox" checked={withName} onChange={(e) => setWithName(e.target.checked)} />
+      </label>
       <div className="row actions-row">
-        <button
-          className="btn btn-primary"
-          onClick={() =>
-            onShare(`${daysLabel(b.days)} נקיים${t.name ? ` מ${t.name}` : ''}. צעד אחר צעד, רק להיום. (לצעוד לתוך היום)`)
-          }
-        >
-          שיתוף
+        <button className="btn btn-primary" onClick={() => onShare(b.days, withName)}>
+          שיתוף תמונה
         </button>
         <button className="btn btn-ghost" onClick={onEdit}>
           עריכה

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BottomNav } from './components/Chrome';
+import { CelebrationLayer, Toasts } from './components/Feedback';
+import { LockGate } from './components/Lock';
 import { SosSheet } from './components/SosSheet';
+import { DocumentSync, MilestoneWatcher, WhatsNew } from './components/Watchers';
 import { todayISO } from './lib/dates';
 import { useRoute } from './lib/router';
 import { useAppState } from './lib/store';
@@ -27,6 +30,19 @@ function useToday() {
 }
 
 export function App() {
+  return (
+    <>
+      <DocumentSync />
+      <LockGate>
+        <Shell />
+      </LockGate>
+      <CelebrationLayer />
+      <Toasts />
+    </>
+  );
+}
+
+function Shell() {
   const s = useAppState();
   const route = useRoute();
   const today = useToday();
@@ -34,18 +50,14 @@ export function App() {
   const openSos = useCallback(() => setSos(true), []);
   const closeSos = useCallback(() => setSos(false), []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (s.theme === 'light' || s.theme === 'dark') root.dataset.theme = s.theme;
-    else delete root.dataset.theme;
-  }, [s.theme]);
-
   if (!s.onboarded) return <Onboarding />;
 
   let screen;
+  let key: string = route.name;
   switch (route.name) {
     case 'day':
       screen = <DayView date={route.date} onSos={openSos} />;
+      key = route.date;
       break;
     case 'clean':
       screen = <CounterScreen onSos={openSos} />;
@@ -55,6 +67,7 @@ export function App() {
       break;
     case 'step':
       screen = <StepScreen step={route.step} onSos={openSos} />;
+      key = `step-${route.step}`;
       break;
     case 'journal':
       screen = <JournalScreen onSos={openSos} />;
@@ -64,13 +77,21 @@ export function App() {
       break;
     default:
       screen = <DayView date={today} onSos={openSos} />;
+      key = today;
   }
 
   return (
     <div className="app">
-      <main>{screen}</main>
+      <a className="skip-link" href="#main">
+        דילוג לתוכן
+      </a>
+      <main id="main" key={key} className="route">
+        {screen}
+      </main>
       <BottomNav route={route} />
       {sos && <SosSheet onClose={closeSos} />}
+      <MilestoneWatcher />
+      <WhatsNew />
     </div>
   );
 }

@@ -1,10 +1,12 @@
-// היומן: כל מה שנכתב בשאלון היומי, מהחדש לישן, עם נתוני התמדה.
+// היומן: תובנות לאורך זמן, וכל מה שנכתב: תשובות, הערות וסיכומי ערב. עם חיפוש.
 
+import { useMemo, useState } from 'react';
 import { getStep } from '../content/steps';
 import { TopBar } from '../components/Chrome';
 import { Insights } from '../components/Insights';
 import { addDays, formatHebrew, formatLong, todayISO } from '../lib/dates';
 import { positionFor } from '../lib/program';
+import { MOODS } from '../lib/sobriety';
 import { trackOf, useAppState, type AppState } from '../lib/store';
 
 function streak(s: AppState): number {
@@ -19,12 +21,44 @@ function streak(s: AppState): number {
   return n;
 }
 
+const PAGE = 30;
+
+/** מסמן את מילת החיפוש בתוך הטקסט */
+function Highlight({ text, q }: { text: string; q: string }) {
+  if (!q) return <>{text}</>;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, i)}
+      <mark>{text.slice(i, i + q.length)}</mark>
+      {text.slice(i + q.length)}
+    </>
+  );
+}
+
 export function JournalScreen({ onSos }: { onSos: () => void }) {
   const s = useAppState();
   const today = todayISO();
-  const entries = Object.entries(s.days)
-    .filter(([d, r]) => d <= today && ((r.answers ?? []).some((a) => a?.trim()) || r.note?.trim()))
-    .sort(([a], [b]) => (a < b ? 1 : -1));
+  const [q, setQ] = useState('');
+  const [limit, setLimit] = useState(PAGE);
+  const query = q.trim();
+
+  const entries = useMemo(() => {
+    return Object.entries(s.days)
+      .filter(([d, r]) => d <= today && ((r.answers ?? []).some((a) => a?.trim()) || r.note?.trim() || r.review))
+      .sort(([a], [b]) => (a < b ? 1 : -1))
+      .map(([d, r]) => {
+        const texts = [...(r.answers ?? []), r.note ?? ''].map((x) => x?.trim()).filter(Boolean) as string[];
+        return { d, r, texts };
+      })
+      .filter(({ d, texts, r }) => {
+        if (!query) return true;
+        const hay = [formatLong(d), formatHebrew(d), ...texts, ...(r.review?.triggers ?? [])].join(' ').toLowerCase();
+        return hay.includes(query.toLowerCase());
+      });
+  }, [s.days, today, query]);
+
   const doneCount = Object.values(s.days).filter((r) => r.done).length;
 
   return (
@@ -40,33 +74,82 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
         <p className="section-title">
           רשומות היומן
           <span className="muted small">
-            {" "}· {doneCount} ימי עבודה הושלמו · רצף פעילות {streak(s)} ימים
+            {' '}
+            · {doneCount} ימי עבודה הושלמו · רצף פעילות {streak(s)} ימים
           </span>
         </p>
 
+        <div className="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M16 16l4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            placeholder="חיפוש ביומן"
+            aria-label="חיפוש ביומן"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setLimit(PAGE);
+            }}
+          />
+        </div>
+
         {entries.length === 0 ? (
-          <div className="card">
-            <p className="muted">היומן עוד ריק. מה שייכתב בשאלון היומי יופיע כאן.</p>
-            <a href="#/">לשאלון של היום</a>
+          <div className="card empty">
+            {query ? (
+              <p className="muted">לא נמצא "{query}" ביומן.</p>
+            ) : (
+              <>
+                <p className="muted">היומן עוד ריק. התשובות בשאלון היומי וסיכומי הערב יופיעו כאן.</p>
+                <a className="btn btn-ghost" href="#/">
+                  לשאלון של היום
+                </a>
+              </>
+            )}
           </div>
         ) : (
-          entries.map(([d, r]) => {
-            const pos = positionFor(d, trackOf(s));
-            const text = [...(r.answers ?? []), r.note ?? ''].find((a) => a?.trim()) ?? '';
-            return (
-              <a key={d} className="card entry" href={d === today ? '#/' : `#/day/${d}`}>
-                <div className="entry-date">{formatLong(d)}</div>
-                <div className="small muted">{formatHebrew(d)}</div>
-                {pos && (
-                  <div className="entry-meta">
-                    {getStep(pos.step).name} · יום {pos.day}
-                    {r.done ? ' · ✓ הושלם' : ''}
+          <>
+            {query && <p className="muted small">נמצאו {entries.length} ימים</p>}
+            {entries.slice(0, limit).map(({ d, r, texts }) => {
+              const pos = positionFor(d, trackOf(s));
+              const shown = query ? texts.find((t) => t.toLowerCase().includes(query.toLowerCase())) ?? texts[0] : texts[0];
+              const mood = MOODS.find((m) => m.value === r.review?.mood);
+              return (
+                <a key={d} className="card entry" href={d === today ? '#/' : `#/day/${d}`}>
+                  <div className="entry-top">
+                    <span>
+                      <span className="entry-date">{formatLong(d)}</span>
+                      <span className="small muted" style={{ display: 'block' }}>
+                        {formatHebrew(d)}
+                      </span>
+                    </span>
+                    {mood && (
+                      <span className="entry-mood" title={mood.label} aria-label={`מצב רוח: ${mood.label}`}>
+                        {mood.emoji}
+                      </span>
+                    )}
                   </div>
-                )}
-                <div className="entry-text">{text}</div>
-              </a>
-            );
-          })
+                  <div className="entry-meta">
+                    {pos && `${getStep(pos.step).name} · יום ${pos.day}`}
+                    {r.done ? ' · ✓ הושלם' : ''}
+                    {r.review && (r.review.clean ? ' · יום נקי' : ' · הייתה מעידה')}
+                  </div>
+                  {shown && (
+                    <div className="entry-text">
+                      <Highlight text={shown} q={query} />
+                    </div>
+                  )}
+                </a>
+              );
+            })}
+            {entries.length > limit && (
+              <button className="btn btn-ghost btn-block" onClick={() => setLimit((l) => l + PAGE)}>
+                עוד רשומות ({entries.length - limit})
+              </button>
+            )}
+          </>
         )}
       </div>
     </>

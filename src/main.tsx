@@ -3,7 +3,9 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/heebo';
 import '@fontsource/secular-one';
 import './styles.css';
+import './styles-v2.css';
 import { App } from './App';
+import { registerServiceWorker } from './lib/pwa';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -11,9 +13,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// עבודה אופליין והתקנה כאפליקציה (רק בגרסת הייצור)
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
-}
+// עבודה אופליין, התקנה כאפליקציה והודעה על גרסה חדשה (רק בגרסת הייצור)
+registerServiceWorker();

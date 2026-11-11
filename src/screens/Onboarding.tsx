@@ -7,6 +7,7 @@ import { PublisherLogo, TitleMark } from '../components/Brand';
 import { todayISO } from '../lib/dates';
 import { setState, type AppState } from '../lib/store';
 import { uid } from '../lib/sobriety';
+import { APP_VERSION } from '../lib/version';
 import type { Mode } from '../lib/program';
 
 export function Onboarding() {
@@ -21,6 +22,7 @@ export function Onboarding() {
     setState((s): AppState => ({
       ...s,
       onboarded: true,
+      seenVersion: APP_VERSION,
       joinedAt: s.joinedAt ?? todayISO(),
       mode,
       startDate: mode === 'personal' ? startDate : s.startDate,

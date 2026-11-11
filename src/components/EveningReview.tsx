@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { ChipPicker } from './Sheet';
 import type { ISODate } from '../lib/dates';
 import { MOODS, TRIGGERS } from '../lib/sobriety';
+import { haptic } from '../lib/feedback';
 import { updateDay, useAppState, type DayReview } from '../lib/store';
 
-export function EveningReview({ date }: { date: ISODate }) {
+export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: DayReview) => void }) {
   const s = useAppState();
   const saved = s.days[date]?.review;
   const [editing, setEditing] = useState(!saved);
@@ -18,7 +19,9 @@ export function EveningReview({ date }: { date: ISODate }) {
   const save = () => {
     if (clean === undefined) return;
     const review: DayReview = { clean, mood, craving, triggers, at: new Date().toISOString() };
-    updateDay(date, (d) => ({ ...d, review }));
+    if (onSaved) onSaved(review);
+    else updateDay(date, (d) => ({ ...d, review }));
+    haptic(12);
     setEditing(false);
   };
 

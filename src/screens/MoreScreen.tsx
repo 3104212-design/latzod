@@ -1,6 +1,11 @@
 // עוד: הגדרות המסלול, ספירת ימים נקיים, איש קשר, תוכן, גיבוי ואודות.
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
+import { InstallCard } from '../components/Install';
+import { LockSettings } from '../components/Lock';
+import { RemindersCard, TextSizePicker } from '../components/Reminders';
+import { toast } from '../lib/feedback';
+import { APP_VERSION } from '../lib/version';
 import { TopBar } from '../components/Chrome';
 import { BookCredit, TitleBadge } from '../components/Brand';
 import { todayISO } from '../lib/dates';
@@ -13,12 +18,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
   const s = useAppState();
   const backupInput = useRef<HTMLInputElement>(null);
   const contentInput = useRef<HTMLInputElement>(null);
-  const [msg, setMsg] = useState('');
-
-  const flash = (m: string) => {
-    setMsg(m);
-    setTimeout(() => setMsg(''), 3000);
-  };
+  const flash = (m: string) => toast(m);
 
   const importBackup = async (f: File) => {
     try {
@@ -54,12 +54,6 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
         <p>הגדרות, גיבוי ופרטים על האפליקציה</p>
       </div>
       <div className="stack">
-        {msg && (
-          <div className="card commit" role="status">
-            {msg}
-          </div>
-        )}
-
         <section className="card book-card">
           <TitleBadge height={92} />
           <p className="book-card-sub">
@@ -69,6 +63,10 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
           </p>
           <BookCredit />
         </section>
+
+        <InstallCard />
+
+        <RemindersCard />
 
         <section className="card">
           <p className="card-label">המסלול שלי</p>
@@ -135,6 +133,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
 
         <section className="card">
           <p className="card-label">תצוגה</p>
+          <TextSizePicker />
           {(
             [
               ['auto', 'לפי המכשיר'],
@@ -148,6 +147,8 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
             </label>
           ))}
         </section>
+
+        <LockSettings />
 
         <section className="card">
           <p className="card-label">תוכן הקריאות</p>
@@ -221,6 +222,12 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
           <p className="muted small">
             האפליקציה היא כלי עזר אישי. היא לא מחליפה קבוצה, ספונסר או טיפול מקצועי.
           </p>
+          <div className="row about-row">
+            <span className="pill">גרסה {APP_VERSION}</span>
+            <button className="btn btn-ghost" onClick={() => setState((st) => ({ ...st, seenVersion: undefined }))}>
+              מה חדש בגרסה
+            </button>
+          </div>
         </section>
 
         <button

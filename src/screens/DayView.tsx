@@ -9,7 +9,36 @@ import { ContentEditor } from './ContentEditor';
 import { addDays, formatHebrew, formatLong, fromISO, todayISO, type ISODate } from '../lib/dates';
 import { positionFor, resolveDay, stepDates } from '../lib/program';
 import { go } from '../lib/router';
-import { trackOf, updateDay, useAppState } from '../lib/store';
+import { trackOf, updateDay, useAppState, type DayRecord } from '../lib/store';
+import { useRef } from 'react';
+import { InstallCard } from '../components/Install';
+import { flowState, TodayFlow } from '../components/TodayFlow';
+import { celebrate, haptic } from '../lib/feedback';
+
+function greeting(h = new Date().getHours()) {
+  if (h >= 5 && h < 12) return 'בוקר טוב';
+  if (h >= 12 && h < 17) return 'צהריים טובים';
+  if (h >= 17 && h < 22) return 'ערב טוב';
+  return 'לילה טוב';
+}
+
+/** עדכון יום, ואם כל חמשת הצעדים נעשו, סימון היום כהושלם וחגיגה */
+function updateWithFlow(date: ISODate, patch: (d: DayRecord) => DayRecord, celebrateDone: boolean): boolean {
+  let completed = false;
+  updateDay(date, (d) => {
+    const next = patch(d);
+    const all = flowState(next).every(Boolean);
+    if (all && !d.done) {
+      completed = true;
+      return { ...next, done: true };
+    }
+    return next;
+  });
+  if (completed && celebrateDone) {
+    celebrate({ size: 'big', title: 'היום הושלם!', text: 'התחייבות, קריאה, שאלון, תפילה וסיכום. צעד שלם בדרך. רק להיום.' });
+  }
+  return completed;
+}
 
 export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
   const s = useAppState();
@@ -22,11 +51,52 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
   const next = addDays(date, 1);
   const canPrev = !!positionFor(prev, track);
   const dayHref = (d: ISODate) => (d === today ? '#/' : `#/day/${d}`);
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const dateInput = useRef<HTMLInputElement>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const start = touch.current;
+    touch.current = null;
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > 50) return;
+    // בעברית מדפדפים קדימה בהחלקה ימינה
+    if (dx > 0) go(dayHref(addDays(date, 1)));
+    else if (positionFor(addDays(date, -1), trackOf(s))) go(dayHref(addDays(date, -1)));
+    haptic(8);
+  };
 
   const dates = (
     <div className="hero-dates">
-      {formatLong(date)}
-      <span className="heb">{formatHebrew(date)}</span>
+      {isToday && <span className="greeting">{greeting()}</span>}
+      <button
+        type="button"
+        className="date-jump"
+        aria-label={`${formatLong(date)}. מעבר לתאריך אחר`}
+        onClick={() => {
+          const el = dateInput.current;
+          if (!el) return;
+          if (typeof el.showPicker === 'function') el.showPicker();
+          else el.click();
+        }}
+      >
+        {formatLong(date)}
+        <span className="heb">{formatHebrew(date)}</span>
+      </button>
+      <input
+        ref={dateInput}
+        type="date"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+        value={date}
+        onChange={(e) => e.target.value && go(dayHref(e.target.value))}
+      />
     </div>
   );
 
@@ -58,16 +128,20 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
   // השאלות שעליהן ענו נשמרות יחד עם התשובות, כדי שהתשובה תישאר צמודה לשאלה שלה
   const questions = rec.questions?.length ? rec.questions : content.questions;
   const setAnswer = (i: number, v: string) =>
-    updateDay(date, (d) => {
-      const answers = [...(d.answers ?? [])];
-      answers[i] = v;
-      return { ...d, answers, questions: d.questions?.length ? d.questions : content.questions };
-    });
+    updateWithFlow(
+      date,
+      (d) => {
+        const answers = [...(d.answers ?? [])];
+        answers[i] = v;
+        return { ...d, answers, questions: d.questions?.length ? d.questions : content.questions };
+      },
+      true,
+    );
 
   return (
     <>
       <TopBar onHero onSos={onSos} />
-      <section className="hero">
+      <section className="hero" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <Feet />
         {dates}
         <div className="hero-nav">
@@ -100,24 +174,34 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
       </section>
 
       <div className="stack">
-        <div className="card commit">
+        <div className="card commit" id="sec-pledge">
           <div className="commit-title">רק להיום · 24 שעות</div>
           <div className="bm-step">צעד {pos.step}</div>
           <p className="bm-text">{content.step.commitment}</p>
           {isToday &&
             (rec.checkin ? (
-              <div className="done-state">✓ ההתחייבות של היום נרשמה</div>
+              <div className="done-state">
+                ✓ ההתחייבות נרשמה ב-
+                {new Date(rec.checkin).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+              </div>
             ) : (
               <button
-                className="btn btn-primary"
-                onClick={() => updateDay(date, (d) => ({ ...d, checkin: new Date().toISOString() }))}
+                className="btn btn-primary btn-pledge"
+                onClick={() => {
+                  const all = updateWithFlow(date, (d) => ({ ...d, checkin: new Date().toISOString() }), true);
+                  if (!all) celebrate({ size: 'small', title: 'רק להיום. 24 שעות מתחילות עכשיו.' });
+                }}
               >
                 מתחייבים לעוד 24 שעות
               </button>
             ))}
         </div>
 
+        {!isFuture && <TodayFlow rec={rec} />}
+
         {isToday && <TrackerSummary />}
+
+        {isToday && <InstallCard banner />}
 
         {isToday && s.reasons.length > 0 && <ReasonOfTheDay date={date} />}
 
@@ -137,7 +221,7 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
           </a>
         </div>
 
-        <div className="card">
+        <div className="card" id="sec-read">
           <p className="card-label">
             הקריאה היומית
             {content.isDraft && <span className="draft-badge">טיוטה</span>}
@@ -164,9 +248,22 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
           {content.isDraft && (
             <p className="muted small draft-note">טקסט זמני שנכתב במיוחד לאפליקציה. יוחלף בקריאה מהספר.</p>
           )}
+          {!isFuture && (
+            <button
+              type="button"
+              className={`check-btn${rec.read ? ' on' : ''}`}
+              aria-pressed={!!rec.read}
+              onClick={() => {
+                haptic(10);
+                updateWithFlow(date, (d) => ({ ...d, read: !d.read }), true);
+              }}
+            >
+              <span aria-hidden="true">{rec.read ? '✓' : '○'}</span> {rec.read ? 'קראתי' : 'סימון: קראתי'}
+            </button>
+          )}
         </div>
 
-        <div className="card questionnaire">
+        <div className="card questionnaire" id="sec-questions">
           <p className="card-label">שאלון להיום</p>
           {isFuture && <p className="muted small">השאלון ייפתח ביום הזה. רק להיום.</p>}
           {questions.map((q, i) => (
@@ -186,18 +283,35 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
               id="note"
               value={rec.note ?? ''}
               disabled={isFuture}
-              onChange={(e) => updateDay(date, (d) => ({ ...d, note: e.target.value }))}
+              onChange={(e) => updateWithFlow(date, (d) => ({ ...d, note: e.target.value }), true)}
             />
           </div>
           <p className="saved-hint">נשמר אוטומטית, ורק במכשיר הזה.</p>
         </div>
 
-        <div className="card">
+        <div className="card" id="sec-prayer">
           <p className="card-label">תפילה להיום</p>
           <p className="prayer">{content.prayer}</p>
+          {!isFuture && (
+            <button
+              type="button"
+              className={`check-btn${rec.prayed ? ' on' : ''}`}
+              aria-pressed={!!rec.prayed}
+              onClick={() => {
+                haptic(10);
+                updateWithFlow(date, (d) => ({ ...d, prayed: !d.prayed }), true);
+              }}
+            >
+              <span aria-hidden="true">{rec.prayed ? '✓' : '○'}</span> {rec.prayed ? 'אמן. אמרתי את התפילה' : 'סימון: אמרתי את התפילה'}
+            </button>
+          )}
         </div>
 
-        {!isFuture && <EveningReview key={date} date={date} />}
+        {!isFuture && (
+          <div id="sec-review">
+            <EveningReview key={date} date={date} onSaved={(r) => updateWithFlow(date, (d) => ({ ...d, review: r }), true)} />
+          </div>
+        )}
 
         {!isFuture &&
           (rec.done ? (
@@ -210,8 +324,14 @@ export function DayView({ date, onSos }: { date: ISODate; onSos: () => void }) {
               </div>
             </div>
           ) : (
-            <button className="btn btn-primary btn-block" onClick={() => updateDay(date, (d) => ({ ...d, done: true }))}>
-              סיימתי את העבודה של היום
+            <button
+              className="btn btn-ghost btn-block"
+              onClick={() => {
+                updateDay(date, (d) => ({ ...d, done: true }));
+                celebrate({ size: 'small', title: 'העבודה של היום הושלמה' });
+              }}
+            >
+              סימון היום כהושלם
             </button>
           ))}
 

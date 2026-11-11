@@ -158,3 +158,15 @@ export function needsMedicalNote(name: string): boolean {
 export function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 }
+
+/** אבן הדרך הגבוהה ביותר שהושגה (במספר ימים), או 0 */
+export function reachedMilestone(ms: number): number {
+  const days = ms / DAY_MS;
+  let best = 0;
+  for (const m of MILESTONES) if (m.days <= days) best = m.days;
+  return best;
+}
+
+export function milestoneLabel(days: number): string {
+  return MILESTONES.find((m) => m.days === days)?.label ?? `${days} ימים`;
+}

@@ -1,8 +1,17 @@
 // חלון תחתון כללי (bottom sheet), נסגר בלחיצה על הרקע או ב-Escape.
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { useBackClose } from '../lib/overlay';
 
 export function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  useBackClose(onClose);
+  const closeBtn = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    // המיקוד עובר לחלון, ואחרי הסגירה חוזר למקום שבו היה
+    const prevFocus = document.activeElement as HTMLElement | null;
+    closeBtn.current?.focus({ preventScroll: true });
+    return () => prevFocus?.focus?.({ preventScroll: true });
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -19,7 +28,7 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
       <div className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
           <h2>{title}</h2>
-          <button className="close-btn" onClick={onClose} aria-label="סגירה">
+          <button ref={closeBtn} className="close-btn" onClick={onClose} aria-label="סגירה">
             ✕
           </button>
         </div>

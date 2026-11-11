@@ -1,0 +1,796 @@
+/* ======================================================================
+   גרסה 2.0: המסלול של היום, חגיגות, הודעות, התקנה, נעילה, יומן עם חיפוש
+   ====================================================================== */
+
+/* ---------- גודל טקסט ---------- */
+:root[data-size='large'] .app,
+:root[data-size='large'] .lock-screen {
+  zoom: 1.12;
+}
+
+:root[data-size='xlarge'] .app,
+:root[data-size='xlarge'] .lock-screen {
+  zoom: 1.25;
+}
+
+/* ---------- מעבר בין מסכים ---------- */
+.route {
+  animation: route-in 0.22s ease-out both;
+}
+
+@keyframes route-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 8px;
+  top: -80px;
+  z-index: 100;
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+/* ---------- ברכה וקפיצה לתאריך ---------- */
+.greeting {
+  display: block;
+  font-family: var(--display);
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.date-jump {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 4px 12px;
+  border-radius: 12px;
+  min-height: var(--tap);
+  cursor: pointer;
+}
+
+.date-jump:hover {
+  background: var(--on-hero-chip);
+}
+
+/* ---------- המסלול של היום ---------- */
+.flow {
+  padding: 14px 14px 12px;
+}
+
+.flow-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.flow-ring {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  transform: rotate(-90deg);
+}
+
+.flow-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+
+.flow-ring .track {
+  stroke: var(--surface-2);
+}
+
+.flow-ring .fill {
+  stroke: var(--green-bright);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.flow-count {
+  position: absolute;
+  inset-inline-start: 0;
+  width: 56px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--green-deep);
+}
+
+.flow-steps {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.flow-step {
+  width: 100%;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  border-radius: 12px;
+  color: var(--muted);
+}
+
+.flow-step:hover {
+  background: var(--surface-2);
+}
+
+.flow-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 14px;
+  border: 2px solid var(--frame);
+  background: var(--surface);
+  color: var(--muted);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.flow-step.next .flow-dot {
+  border-color: var(--green);
+  color: var(--green-deep);
+}
+
+.flow-step.done .flow-dot {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--on-green);
+}
+
+.flow-step.done {
+  color: var(--green-deep);
+}
+
+.flow-label {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.card.flash {
+  animation: flash 1.2s ease-out;
+}
+
+@keyframes flash {
+  0%,
+  40% {
+    box-shadow: 0 0 0 4px var(--green-bright);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* כפתור סימון: קראתי, אמרתי את התפילה */
+.check-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  margin-top: 12px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--frame);
+  background: var(--surface);
+  color: var(--green-deep);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.check-btn.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--on-green);
+}
+
+.btn-pledge {
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 174, 82, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(79, 174, 82, 0);
+  }
+}
+
+/* ---------- הודעות קצרות ---------- */
+.toasts {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  padding: 0 16px;
+}
+
+.toast {
+  pointer-events: auto;
+  max-width: 528px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1b2a1d;
+  color: #f2f7f1;
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 15px;
+  animation: toast-in 0.25s ease-out;
+}
+
+:root[data-theme='dark'] .toast {
+  background: #e4eee4;
+  color: #0d140f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .toast {
+    background: #e4eee4;
+    color: #0d140f;
+  }
+}
+
+.toast > span {
+  flex: 1;
+}
+
+.toast-action {
+  border: none;
+  background: var(--green-bright);
+  color: #0d140f;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 0 14px;
+  min-height: var(--tap);
+}
+
+.toast-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  width: var(--tap);
+  height: var(--tap);
+  font-size: 16px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- חגיגות ---------- */
+.celebrate-small {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.celebrate-pill {
+  position: relative;
+  background: var(--green);
+  color: var(--on-green);
+  font-family: var(--display);
+  font-size: 20px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  animation: pop 2.2s ease-out both;
+  text-align: center;
+  max-width: calc(100vw - 48px);
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  20% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.celebrate-big {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 30, 12, 0.62);
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.celebrate-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: rise 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+}
+
+.celebrate-badge {
+  width: 84px;
+  height: 84px;
+  margin: -70px auto 10px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--on-green);
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0 0 8px var(--surface),
+    0 10px 30px rgba(47, 129, 53, 0.45);
+}
+
+.celebrate-badge svg {
+  width: 30px;
+  height: 60px;
+  transform: rotate(12deg);
+}
+
+.celebrate-card h2 {
+  font-size: 30px;
+  color: var(--green-deep);
+  margin-bottom: 8px;
+}
+
+.celebrate-card p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particles > span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0;
+  animation: burst var(--d) cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+
+.p-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.p-foot svg {
+  width: 14px;
+  height: 28px;
+  display: block;
+}
+
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(calc(var(--s) * 0.4)) rotate(0);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) + 80px)) scale(var(--s)) rotate(var(--r));
+  }
+}
+
+/* ---------- התקנה ---------- */
+.install-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.install-card.banner {
+  padding-inline-end: 48px;
+}
+
+.install-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex: none;
+}
+
+.install-ico {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--green-soft);
+  color: var(--green-deep);
+  font-size: 24px;
+  font-weight: 800;
+  flex: none;
+}
+
+.install-dismiss {
+  position: absolute;
+  top: 2px;
+  inset-inline-end: 2px;
+  width: var(--tap);
+  height: var(--tap);
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.ios-steps {
+  margin: 0;
+  padding-inline-start: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inline-ico {
+  width: 20px;
+  height: 20px;
+  vertical-align: -4px;
+  color: #1a73e8;
+}
+
+/* ---------- נעילה ---------- */
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: var(--hero);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+}
+
+.lock-hint {
+  margin: 0;
+  font-size: 17px;
+  min-height: 1.6em;
+  text-align: center;
+}
+
+.pin-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.pin-dots i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transition: background 0.15s;
+}
+
+.pin-dots i.on {
+  background: currentColor;
+}
+
+.pin-dots.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: 14px;
+}
+
+.key {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  background: var(--on-hero-chip);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.key:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.key:disabled {
+  opacity: 0.4;
+}
+
+.lock-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: var(--hero);
+  color: #fff;
+  border: none;
+}
+
+.lock-setup p {
+  margin: 0 !important;
+  text-align: center;
+}
+
+.lock-forgot {
+  border: none;
+  background: none;
+  color: #fff;
+  text-decoration: underline;
+  min-height: var(--tap);
+  font-size: 15px;
+}
+
+/* ---------- בחירה מקטעית ---------- */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.segmented button {
+  min-height: var(--tap);
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.segmented button.on {
+  background: var(--surface);
+  color: var(--green-deep);
+  box-shadow: var(--shadow);
+}
+
+.row.times > .field {
+  flex: 1;
+  min-width: 120px;
+}
+
+input[type='time'],
+input[type='search'] {
+  width: 100%;
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 16px;
+  min-height: var(--tap);
+}
+
+.about-row {
+  align-items: center;
+  margin-top: 12px;
+}
+
+.whats-new {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.whats-new li {
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: 14px;
+  border-inline-start: 3px solid var(--green-bright);
+}
+
+.whats-new span {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* ---------- יומן ---------- */
+.search {
+  position: relative;
+}
+
+.search svg {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.search input {
+  padding-inline-start: 42px;
+  background: var(--surface);
+  border-color: var(--frame);
+}
+
+.entry-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.entry-mood {
+  font-size: 26px;
+  line-height: 1;
+}
+
+mark {
+  background: #ffe58a;
+  color: #1b2a1d;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.card.empty {
+  text-align: center;
+}
+
+/* ---------- ספירה ---------- */
+.stat.add {
+  border-style: dashed;
+  background: var(--surface-2);
+}
+
+.stat.add b {
+  font-size: 20px;
+}
+
+.share-name {
+  padding: 2px 4px;
+  min-height: var(--tap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route,
+  .btn-pledge,
+  .celebrate-pill,
+  .celebrate-card,
+  .card.flash,
+  .toast {
+    animation: none !important;
+  }
+  .particles {
+    display: none;
+  }
+}
+
+/* החוגה מתכווצת כשאין מקום (טקסט גדול במסך צר) */
+.hero-nav .dial {
+  width: auto;
+  flex: 0 1 250px;
+  min-width: 0;
+}
+
+/* התפריט התחתון לא חורג מהמסך גם בטקסט גדול */
+.bottom-nav ul {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.bottom-nav a {
+  min-width: 0;
+  padding-inline: 0;
+  white-space: nowrap;
+}
+
+/* רכיב מוסתר לקוראי מסך בלבד. גובר על הרוחב של שדות הקלט */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+/* כפתורי מצב הרוח מתכווצים, והתווית יורדת שורה במקום לדחוף את המסך */
+.moods {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.mood small {
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}

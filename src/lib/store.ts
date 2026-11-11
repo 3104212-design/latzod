@@ -4,7 +4,8 @@ import { useSyncExternalStore } from 'react';
 import { todayISO, type ISODate } from './dates';
 import type { DayContent, Mode, TrackSettings } from './program';
 import { nowInputValue } from './dates';
-import { uid, type Tracker } from './sobriety';
+import { elapsedMs, reachedMilestone, uid, type Tracker } from './sobriety';
+import type { LockConfig } from './lock';
 
 export interface DayRecord {
   /** מתי נרשמה ההתחייבות "רק להיום" */
@@ -17,6 +18,10 @@ export interface DayRecord {
   note?: string;
   /** סיכום הערב */
   review?: DayReview;
+  /** הקריאה היומית נקראה */
+  read?: boolean;
+  /** התפילה היומית נאמרה */
+  prayed?: boolean;
 }
 
 export interface DayReview {
@@ -63,6 +68,18 @@ export interface AppState {
   sponsorPhone?: string;
   editorMode: boolean;
   theme?: 'auto' | 'light' | 'dark';
+  /** גודל הטקסט באפליקציה */
+  textSize?: 'normal' | 'large' | 'xlarge';
+  /** נעילה בקוד (גיבוב בלבד) */
+  lock?: LockConfig;
+  /** שעות התזכורות שנבחרו, HH:mm */
+  reminders?: { morning: string; evening: string };
+  /** אבן הדרך האחרונה שנחגגה, לכל ספירה (בימים) */
+  celebrated?: Record<string, number>;
+  /** הגרסה האחרונה שה"מה חדש" שלה הוצג */
+  seenVersion?: string;
+  /** המשתמש סגר את ההצעה להתקין את האפליקציה */
+  installDismissed?: boolean;
   days: Record<ISODate, DayRecord>;
   /** תוכן יומי שהוזן במצב עריכה. מפתח: "<צעד>-<יום>" */
   content: Record<string, DayContent>;
@@ -102,9 +119,12 @@ export function normalize(input: unknown): AppState {
   if (!trackers.length && o.cleanSince) {
     trackers = [{ id: 'main', name: 'ההתמכרות שלי', since: o.cleanSince, history: [] }];
   }
+  const celebrated: Record<string, number> = { ...(o.celebrated ?? {}) };
+  for (const t of trackers) if (celebrated[t.id] == null) celebrated[t.id] = reachedMilestone(elapsedMs(t.since));
   return {
     ...DEFAULT_STATE,
     ...o,
+    celebrated,
     version: 1,
     joinedAt: o.joinedAt ?? (o.onboarded ? (firstDay ?? todayISO()) : undefined),
     mode: o.mode === 'personal' ? 'personal' : 'calendar',
@@ -154,8 +174,12 @@ export function saveTracker(t: Omit<Tracker, 'id' | 'history'> & Partial<Pick<Tr
   setState((s) => {
     const exists = s.trackers.some((x) => x.id === id);
     const tracker: Tracker = { history: [], ...t, id };
+    const before = s.trackers.find((x) => x.id === id);
+    const celebrated = { ...s.celebrated };
+    if (!before || before.since !== tracker.since) celebrated[id] = reachedMilestone(elapsedMs(tracker.since));
     return {
       ...s,
+      celebrated,
       trackers: exists ? s.trackers.map((x) => (x.id === id ? { ...x, ...tracker } : x)) : [...s.trackers, tracker],
     };
   });
@@ -171,6 +195,7 @@ export function restartTracker(id: string, note?: string, triggers: string[] = [
   const now = nowInputValue();
   setState((s) => ({
     ...s,
+    celebrated: { ...s.celebrated, [id]: 0 },
     trackers: s.trackers.map((t) =>
       t.id === id
         ? { ...t, since: now, history: [...t.history, { start: t.since, end: now, note: note?.trim() || undefined, triggers }] }
