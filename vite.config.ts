@@ -45,6 +45,7 @@ function reminderFiles(): Plugin {
 export default defineConfig({
   plugins: [react(), swVersion(), reminderFiles()],
   base: './',
-  server: { port: 5180 },
+  // בפיתוח: שירות ההזמנות רץ מקומית (node server/invites.mjs), והאפליקציה פונה אליו דרך /api
+  server: { port: 5180, proxy: { '/api': 'http://127.0.0.1:3741' } },
   build: { chunkSizeWarningLimit: 1200 },
 });

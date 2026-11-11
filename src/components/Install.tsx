@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Sheet } from './Sheet';
+import { I } from './Icons';
 import { promptInstall, usePwa } from '../lib/pwa';
 import { setState, useAppState } from '../lib/store';
 
@@ -36,7 +37,7 @@ export function InstallCard({ banner }: { banner?: boolean }) {
     return banner ? null : (
       <div className="card install-card">
         <div className="install-ico" aria-hidden="true">
-          ✓
+          {I.check()}
         </div>
         <span>
           <b>האפליקציה מותקנת</b>
@@ -71,7 +72,7 @@ export function InstallCard({ banner }: { banner?: boolean }) {
         )}
         {banner && (
           <button className="install-dismiss" aria-label="לא עכשיו" onClick={() => setState((st) => ({ ...st, installDismissed: true }))}>
-            ✕
+            {I.close({ size: 18 })}
           </button>
         )}
       </div>

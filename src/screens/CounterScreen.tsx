@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { TopBar } from '../components/Chrome';
 import { ChipPicker, Sheet } from '../components/Sheet';
+import { I } from '../components/Icons';
 import { Dial, Feet } from '../components/Visuals';
 import { formatLong, nowInputValue, toISO } from '../lib/dates';
 import { compressImage, useNow } from '../lib/hooks';
@@ -130,6 +131,24 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
   );
 }
 
+function Medal({ state, progress = 0 }: { state: 'got' | 'next' | 'future'; progress?: number }) {
+  const r = 27;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg className={`medal ${state}`} viewBox="0 0 64 64" aria-hidden="true">
+      <circle className="medal-track" cx="32" cy="32" r={r} />
+      {state === 'next' && (
+        <circle className="medal-progress" cx="32" cy="32" r={r} strokeDasharray={c} strokeDashoffset={c * (1 - Math.min(1, progress))} />
+      )}
+      <circle className="medal-face" cx="32" cy="32" r="21" />
+      <g className="medal-foot" transform="translate(26.5 19) scale(0.095)">
+        <path d="M60 0C96 0 118 30 118 74c0 38-14 64-18 86H20C16 138 2 112 2 74 2 30 24 0 60 0Z" />
+        <rect x="18" y="174" width="84" height="66" rx="26" />
+      </g>
+    </svg>
+  );
+}
+
 function TrackerView({
   t,
   now,
@@ -172,6 +191,10 @@ function TrackerView({
   const ticks = Array.from({ length: 24 }, (_, i) => (i < b.hours ? 'done' : 'none') as 'done' | 'none');
   const days = ms / DAY_MS;
 
+  const reached = MILESTONES.filter((m) => days >= m.days);
+  const last = reached[reached.length - 1];
+  const reachedOn = (d: number) => formatLong(toISO(new Date(parseLocal(t.since) + d * DAY_MS)));
+
   return (
     <>
       <section className="counter-hero">
@@ -180,13 +203,53 @@ function TrackerView({
           <span className="dial-num">{b.days.toLocaleString('he-IL')}</span>
           <span className="dial-of">{cleanDaysWord(b.days)}</span>
         </Dial>
-        <div className="clock" dir="ltr" aria-label="שעות, דקות ושניות">
-          {pad(b.hours)}:{pad(b.minutes)}:{pad(b.seconds)}
+        {/* שעות, דקות ושניות כאריחים נפרדים, שרצים בזמן אמת */}
+        <div className="time-tiles" role="img" aria-label={`ועוד ${b.hours} שעות, ${b.minutes} דקות ו-${b.seconds} שניות`}>
+          <span>
+            <b>{pad(b.hours)}</b>
+            <small>שעות</small>
+          </span>
+          <span>
+            <b>{pad(b.minutes)}</b>
+            <small>דקות</small>
+          </span>
+          <span>
+            <b>{pad(b.seconds)}</b>
+            <small>שניות</small>
+          </span>
         </div>
         <div className="counter-since">
           מאז {dateOf(t.since)}, בשעה {timeOf(t.since)}
         </div>
       </section>
+
+      <div className="card ms-pair">
+        {last && (
+          <div className="ms-row">
+            <Medal state="got" />
+            <span className="ms-body">
+              <span className="ms-kicker">אבן הדרך האחרונה</span>
+              <b>{last.label}</b>
+              <span className="muted small">הושגה ב{reachedOn(last.days)}</span>
+            </span>
+          </div>
+        )}
+        {next ? (
+          <div className="ms-row">
+            <Medal state="next" progress={next.progress} />
+            <span className="ms-body">
+              <span className="ms-kicker">אבן הדרך הבאה</span>
+              <b>{next.label}</b>
+              <span className="muted small">עוד {durationLabel(next.remainingMs)}</span>
+              <span className="bar" aria-hidden="true">
+                <span style={{ width: `${Math.min(100, next.progress * 100)}%` }} />
+              </span>
+            </span>
+          </div>
+        ) : (
+          <p className="commit-title">כל אבני הדרך הושגו. רק להיום, עוד יום.</p>
+        )}
+      </div>
 
       <div className="stats">
         {/* כל כרטיס פותח חלון משלו: עלות יומית או זמן ביום. אפשר ללחוץ גם אחרי שיש ערך, כדי לשנות */}
@@ -195,65 +258,43 @@ function TrackerView({
           onClick={() => setQuick('cost')}
           aria-label={t.costPerDay ? `נחסכו ${formatMoney(moneySaved(t, ms))}. לשינוי העלות היומית` : 'הוספת עלות יומית'}
         >
-          <b>{t.costPerDay ? formatMoney(moneySaved(t, ms)) : '+ ₪'}</b>
-          <span>{t.costPerDay ? `נחסכו · ${formatMoney(t.costPerDay)} ליום` : 'להוסיף עלות יומית'}</span>
+          <span className="stat-ic">{I.coin()}</span>
+          <b>{t.costPerDay ? formatMoney(moneySaved(t, ms)) : 'כסף'}</b>
+          <span>{t.costPerDay ? `נחסכו · ${formatMoney(t.costPerDay)} ליום` : '+ עלות יומית'}</span>
         </button>
         <button
           className={`card stat${t.hoursPerDay ? '' : ' add'}`}
           onClick={() => setQuick('hours')}
           aria-label={t.hoursPerDay ? `${formatHours(hoursSaved(t, ms))} חזרו אליי. לשינוי הזמן ביום` : 'הוספת זמן ביום'}
         >
-          <b>{t.hoursPerDay ? formatHours(hoursSaved(t, ms)) : '+ שעות'}</b>
-          <span>{t.hoursPerDay ? `של זמן חזרו אליי · ${t.hoursPerDay} ש׳ ביום` : 'להוסיף זמן ביום'}</span>
+          <span className="stat-ic">{I.clock()}</span>
+          <b>{t.hoursPerDay ? formatHours(hoursSaved(t, ms)) : 'זמן'}</b>
+          <span>{t.hoursPerDay ? `חזרו אליי · ${t.hoursPerDay} ש׳ ביום` : '+ שעות ביום'}</span>
         </button>
         <div className="card stat">
+          <span className="stat-ic">{I.trophy()}</span>
           <b>{daysLabel(Math.floor(best / DAY_MS))}</b>
           <span>הרצף הארוך ביותר</span>
         </div>
       </div>
 
+      <p className="section-title">אבני דרך</p>
       <div className="card">
-        {next ? (
-          <>
-            <p className="card-label">אבן הדרך הבאה</p>
-            <div className="next-ms">
-              <h2>{next.label}</h2>
-              <span className="muted small">עוד {durationLabel(next.remainingMs)}</span>
-            </div>
-            <div className="bar big" aria-hidden="true">
-              <span style={{ width: `${Math.min(100, next.progress * 100)}%` }} />
-            </div>
-          </>
-        ) : (
-          <p className="commit-title">כל אבני הדרך הושגו. רק להיום, עוד יום.</p>
-        )}
-      </div>
-
-      <div className="card">
-        <p className="card-label">אבני דרך</p>
         <div className="badges">
           {MILESTONES.map((m) => {
             const got = days >= m.days;
+            const isNext = !got && next?.days === m.days;
             return (
-              <div key={m.days} className={`badge${got ? ' got' : ''}`} title={got ? `הושג ב${formatLong(toISO(new Date(parseLocal(t.since) + m.days * DAY_MS)))}` : undefined}>
-                <svg viewBox="0 0 64 64" aria-hidden="true">
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const a = ((i * 30 - 90) * Math.PI) / 180;
-                    return (
-                      <line
-                        key={i}
-                        x1={32 + 25 * Math.cos(a)}
-                        y1={32 + 25 * Math.sin(a)}
-                        x2={32 + 30 * Math.cos(a)}
-                        y2={32 + 30 * Math.sin(a)}
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    );
-                  })}
-                  <circle cx="32" cy="32" r="21" />
-                </svg>
-                <span className="badge-label">{m.label}</span>
+              <div
+                key={m.days}
+                className={`badge${got ? ' got' : ''}${isNext ? ' next' : ''}`}
+                aria-label={`${m.label}: ${got ? `הושגה ב${reachedOn(m.days)}` : isNext ? 'הבאה בתור' : 'עוד לא'}`}
+                role="img"
+              >
+                <Medal state={got ? 'got' : isNext ? 'next' : 'future'} progress={isNext ? next?.progress : undefined} />
+                <span className="badge-label" aria-hidden="true">
+                  {m.label}
+                </span>
               </div>
             );
           })}
@@ -276,9 +317,11 @@ function TrackerView({
                 .catch(() => toast('לא הצלחנו להכין את התמונה. אפשר לנסות שוב.'));
           }}
         >
-          {shareBlob || shareFailed ? 'שיתוף תמונה' : 'מכינים תמונה…'}
+          {I.share({ size: 20 })}
+          {shareBlob || shareFailed ? 'שיתוף' : 'מכינים…'}
         </button>
         <button className="btn btn-ghost" onClick={onEdit}>
+          {I.edit({ size: 20 })}
           עריכה
         </button>
         <button className="btn btn-danger" onClick={onRestart}>
@@ -526,7 +569,7 @@ function Reasons() {
       {s.reasons.length > 0 && (
         <div className="reasons">
           {s.reasons.map((r) => (
-            <div key={r.id} className="reason">
+            <div key={r.id} className={`reason${r.photo ? '' : ' text-only'}`}>
               {r.photo && <img src={r.photo} alt="" />}
               {r.text && <p>{r.text}</p>}
               <button
@@ -534,7 +577,7 @@ function Reasons() {
                 aria-label="מחיקת הסיבה"
                 onClick={() => confirm('למחוק את הסיבה הזו?') && removeReason(r.id)}
               >
-                ✕
+                {I.close({ size: 18 })}
               </button>
             </div>
           ))}

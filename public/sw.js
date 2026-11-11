@@ -27,7 +27,10 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  // שירות ההזמנות: תמיד מהרשת, אף פעם לא מהמטמון
+  if (url.pathname.includes('/api/')) return;
 
   // דפים: קודם רשת (כדי לקבל עדכונים), ואם אין חיבור, מהמטמון
   if (req.mode === 'navigate') {

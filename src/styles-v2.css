@@ -201,11 +201,12 @@
   margin-top: 12px;
   padding: 6px 16px;
   border-radius: 999px;
-  border: 1.5px solid var(--frame);
+  border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--green-deep);
   font-weight: 700;
   font-size: 15px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .check-btn.on {
@@ -456,9 +457,21 @@
 /* ---------- התקנה ---------- */
 .install-card {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   position: relative;
+}
+
+/* טקסט שמתכווץ ושובר שורות, וכפתור שיורד שורה במסך צר עם טקסט גדול (אחרת המסך כולו נמתח הצידה) */
+.install-card > span {
+  min-width: 0;
+  flex: 1 1 160px;
+  overflow-wrap: anywhere;
+}
+
+.install-card > .btn {
+  margin-inline-start: auto;
 }
 
 .install-card.banner {
@@ -730,8 +743,9 @@ mark {
 
 /* ---------- ספירה ---------- */
 .stat.add {
-  border-style: dashed;
+  border: 1px dashed var(--line-strong);
   background: var(--surface-2);
+  box-shadow: none;
 }
 
 .stat.add b {

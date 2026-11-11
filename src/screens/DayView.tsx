@@ -13,10 +13,12 @@ import { trackOf, useAppState, type DayRecord } from '../lib/store';
 import { useEffect, useRef, useState } from 'react';
 import { InstallCard } from '../components/Install';
 import { TodayFlow } from '../components/TodayFlow';
+import { PledgeChallenge } from '../components/Challenge';
 import { DailyWalk } from '../components/DailyWalk';
 import { WelcomeBack } from '../components/WelcomeBack';
 import { WeekReadyCard, WeekSheet } from '../components/WeekSummary';
 import { FootIcon } from '../components/Visuals';
+import { I } from '../components/Icons';
 import { FLOW, flowState, greeting, nextFlowIndex, updateWithFlow } from '../lib/day';
 import { celebrate, haptic } from '../lib/feedback';
 
@@ -132,7 +134,7 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
         {dates}
         <div className="hero-nav">
           <button className="icon-btn" disabled={!canPrev} onClick={() => go(dayHref(prev))} aria-label="היום הקודם">
-            ›
+            {I.back()}
           </button>
           <Dial
             total={pos.length}
@@ -145,7 +147,7 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
             <span className="dial-of">מתוך {pos.length}</span>
           </Dial>
           <button className="icon-btn" onClick={() => go(dayHref(next))} aria-label="היום הבא">
-            ‹
+            {I.forward()}
           </button>
         </div>
         <h1 className="hero-step">{content.step.name}</h1>
@@ -170,7 +172,7 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
           {isToday &&
             (rec.checkin ? (
               <div className="done-state">
-                ✓ ההתחייבות נרשמה ב-
+                {I.check({ size: 20 })} ההתחייבות נרשמה ב-
                 {new Date(rec.checkin).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
               </div>
             ) : (
@@ -187,6 +189,8 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
         </div>
 
         {!isFuture && <TodayFlow rec={rec} />}
+
+        {isToday && <PledgeChallenge />}
 
         {isToday && <TrackerSummary />}
 
@@ -247,7 +251,10 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
                 updateWithFlow(date, (d) => ({ ...d, read: !d.read }), true);
               }}
             >
-              <span aria-hidden="true">{rec.read ? '✓' : '○'}</span> {rec.read ? 'קראתי' : 'סימון: קראתי'}
+              <span className="check-dot" aria-hidden="true">
+                {rec.read && I.check({ size: 16 })}
+              </span>
+              {rec.read ? 'קראתי' : 'סימון: קראתי'}
             </button>
           )}
         </div>
@@ -291,7 +298,10 @@ export function DayView({ date, onSos, autoWalk }: { date: ISODate; onSos: () =>
                 updateWithFlow(date, (d) => ({ ...d, prayed: !d.prayed }), true);
               }}
             >
-              <span aria-hidden="true">{rec.prayed ? '✓' : '○'}</span> {rec.prayed ? 'אמן. אמרתי את התפילה' : 'סימון: אמרתי את התפילה'}
+              <span className="check-dot" aria-hidden="true">
+                {rec.prayed && I.check({ size: 16 })}
+              </span>
+              {rec.prayed ? 'אמן. אמרתי את התפילה' : 'סימון: אמרתי את התפילה'}
             </button>
           )}
         </div>
@@ -323,7 +333,7 @@ function WalkCta({ rec, onOpen }: { rec: DayRecord; onOpen: () => void }) {
       <button className="walk-cta" onClick={onOpen}>
         <FootIcon className="walk-cta-foot" />
         {label}
-        <span aria-hidden="true">‹</span>
+        {I.forward({ size: 18 })}
       </button>
     </div>
   );

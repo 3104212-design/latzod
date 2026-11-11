@@ -1,8 +1,10 @@
 // עוד: הספר והאפליקציה, התקנה, הזמנת משתתפים, תזכורות, המסלול, איש קשר, תצוגה, נעילה, תוכן וגיבוי.
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { I } from '../components/Icons';
 import { InstallCard } from '../components/Install';
-import { InviteCard } from '../components/Invite';
+import { AdminPairSheet, InviteAdminCard } from '../components/Invite';
+import { isBackup, RESTORE_MESSAGES, restoreBackupFile } from '../lib/backup';
 import { LockSettings } from '../components/Lock';
 import { RemindersCard, TextSizePicker } from '../components/Reminders';
 import { toast } from '../lib/feedback';
@@ -12,44 +14,31 @@ import { TopBar } from '../components/Chrome';
 import { BookCredit, TitleBadge } from '../components/Brand';
 import { todayISO } from '../lib/dates';
 import type { DayContent } from '../lib/program';
-import { downloadJSON, normalize, readJSONFile, resetAll, setState, useAppState, type AppState } from '../lib/store';
+import { downloadJSON, readJSONFile, resetAll, setState, useAppState, type AppState } from '../lib/store';
 
 const patch = (p: Partial<AppState>) => setState((s) => ({ ...s, ...p }));
-
-/** קובץ שנראה כמו גיבוי של האפליקציה (ולא קובץ תוכן או JSON אחר) */
-function isBackup(raw: unknown): raw is Partial<AppState> {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
-  const o = raw as Record<string, unknown>;
-  return (o.days != null && typeof o.days === 'object') || Array.isArray(o.trackers) || typeof o.onboarded === 'boolean';
-}
 
 export function MoreScreen({ onSos }: { onSos: () => void }) {
   const s = useAppState();
   const backupInput = useRef<HTMLInputElement>(null);
   const contentInput = useRef<HTMLInputElement>(null);
   const flash = (m: string) => toast(m);
+  const [pair, setPair] = useState(false);
+  // כניסת מנהל: חמש לחיצות על מספר הגרסה
+  const taps = useRef<number[]>([]);
+  const tapVersion = () => {
+    const t = Date.now();
+    taps.current = [...taps.current.filter((x) => t - x < 2500), t];
+    if (taps.current.length >= 5) {
+      taps.current = [];
+      if (s.admin) flash('מצב מנהל כבר פעיל במכשיר הזה');
+      else setPair(true);
+    }
+  };
 
   const importBackup = async (f: File) => {
-    let raw: unknown;
-    try {
-      raw = await readJSONFile(f);
-    } catch {
-      flash('לא הצלחנו לקרוא את הקובץ');
-      return;
-    }
-    // קובץ אחר (למשל קובץ התוכן) היה מוחק את כל הנתונים. מקבלים רק גיבוי של האפליקציה
-    if (!isBackup(raw)) {
-      flash('הקובץ הזה אינו גיבוי של האפליקציה');
-      return;
-    }
-    const data = normalize(raw);
-    const days = Object.keys(data.days).length;
-    const counters = data.trackers.length;
-    const what = `בגיבוי: ${daysLabel(days)} ביומן${counters ? `, ${counters === 1 ? 'ספירה אחת' : `${counters} ספירות`}` : ''}.`;
-    if (confirm(`${what}\n\nהגיבוי יחליף את כל הנתונים שבמכשיר עכשיו. להמשיך?`)) {
-      setState({ ...data, onboarded: true });
-      flash('הגיבוי שוחזר');
-    }
+    const r = await restoreBackupFile(f);
+    if (r !== 'cancelled') flash(RESTORE_MESSAGES[r]);
   };
 
   const saveBackup = async () => {
@@ -96,19 +85,27 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
             האפליקציה מלווה את הספר ואינה מחליפה קבוצה, ספונסר או טיפול מקצועי.
           </p>
           <div className="row about-row">
-            <span className="pill">גרסה {APP_VERSION}</span>
+            <button type="button" className="pill version-pill" onClick={tapVersion}>
+              גרסה {APP_VERSION}
+            </button>
             <button className="btn btn-ghost" onClick={() => setState((st) => ({ ...st, seenVersion: PREVIOUS_RELEASE }))}>
               מה חדש
             </button>
           </div>
         </section>
 
+        {s.admin && (
+          <>
+            <p className="group-title">{I.users({ size: 20 })} הזמנות</p>
+            <InviteAdminCard />
+          </>
+        )}
+
+        <p className="group-title">{I.bell({ size: 20 })} התקנה ותזכורות</p>
         <InstallCard />
-
-        <InviteCard />
-
         <RemindersCard />
 
+        <p className="group-title">{I.user({ size: 20 })} המסלול והפרטים שלי</p>
         <section className="card">
           <p className="card-label">המסלול שלי</p>
           <label className="choice">
@@ -170,6 +167,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
           </div>
         </section>
 
+        <p className="group-title">{I.display({ size: 20 })} תצוגה ופרטיות</p>
         <section className="card">
           <p className="card-label">תצוגה</p>
           <TextSizePicker />
@@ -189,6 +187,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
 
         <LockSettings />
 
+        <p className="group-title">{I.data({ size: 20 })} תוכן וגיבוי</p>
         <section className="card">
           <p className="card-label">תוכן הקריאות</p>
           <label className="toggle">
@@ -255,7 +254,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
         <button
           className="btn btn-danger btn-block"
           onClick={() => {
-            if (confirm('כל הנתונים במכשיר יימחקו לצמיתות: היומן, ההתחייבויות וההגדרות. אי אפשר לבטל את זה.\n\nלמחוק?')) {
+            if (confirm('כל הנתונים במכשיר יימחקו לצמיתות: היומן, ההתחייבויות, הספירות וההגדרות. אי אפשר לבטל את זה.\n\nלמחוק?')) {
               resetAll();
               location.hash = '#/';
             }
@@ -264,6 +263,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
           מחיקת כל הנתונים
         </button>
       </div>
+      {pair && <AdminPairSheet onClose={() => setPair(false)} />}
     </>
   );
 }

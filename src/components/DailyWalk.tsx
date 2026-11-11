@@ -7,6 +7,7 @@ import { EveningReview } from './EveningReview';
 import { Particles } from './Feedback';
 import { pledgeStreak } from './Insights';
 import { FootIcon } from './Visuals';
+import { I } from './Icons';
 import type { ISODate } from '../lib/dates';
 import { FLOW, flowState, greeting, isEvening, nextFlowIndex, updateWithFlow } from '../lib/day';
 import { haptic } from '../lib/feedback';
@@ -115,7 +116,11 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
       main = (
         <>
           <p className="walk-big">{content.step.commitment}</p>
-          {rec.checkin && <p className="done-state">✓ ההתחייבות נרשמה ב-{timeOf(rec.checkin)}</p>}
+          {rec.checkin && (
+            <p className="done-state">
+              {I.check({ size: 20 })} ההתחייבות נרשמה ב-{timeOf(rec.checkin)}
+            </p>
+          )}
         </>
       );
       actions = rec.checkin ? (
@@ -162,7 +167,7 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
         </button>
       ) : (
         <button className="btn btn-primary walk-next" onClick={() => complete(1, (d) => ({ ...d, read: true }))}>
-          ✓ קראתי
+          {I.check({ size: 20 })} קראתי
         </button>
       );
       break;
@@ -269,7 +274,7 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
       <header className="walk-top">
         <div className="walk-bar">
           <button className="icon-btn" onClick={onClose} aria-label="סגירת הצעידה">
-            ✕
+            {I.close()}
           </button>
           <span className="walk-stage-name">{stage < END ? `${stage + 1} מתוך 5 · ${FLOW[stage].label}` : `${n} מתוך 5`}</span>
           {/* "עזרה עכשיו" זמין גם באמצע הצעידה. החלון נפתח מעליה */}
@@ -309,7 +314,7 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
       <footer className="walk-actions">
         {stage > 0 && stage < END && (
           <button className="btn btn-ghost walk-back" onClick={back} aria-label="הקודם">
-            ›
+            {I.back()}
           </button>
         )}
         {actions}

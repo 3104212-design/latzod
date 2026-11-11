@@ -21,8 +21,16 @@
   --warn: #a23f2b;
   --warn-soft: #f8e7e2;
   --shadow: 0 1px 2px rgba(27, 42, 29, 0.06), 0 4px 16px rgba(27, 42, 29, 0.06);
+  /* קו דק לכרטיסים, וצל רך במקום מסגרת ירוקה עבה */
+  --line-strong: #cbd8c7;
+  --card-line: rgba(27, 42, 29, 0.07);
+  --shadow-card: 0 1px 2px rgba(20, 36, 22, 0.04), 0 10px 26px -14px rgba(20, 36, 22, 0.18);
+  --shadow-pop: 0 14px 34px -10px rgba(20, 36, 22, 0.32);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --focus-ring: rgba(63, 157, 67, 0.24);
   --tap: 44px;
-  --radius: 18px;
+  --radius: 20px;
+  --radius-sm: 14px;
   --font: 'Heebo Variable', 'Heebo', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   --display: 'Secular One', 'Heebo Variable', system-ui, sans-serif;
   color-scheme: light;
@@ -51,6 +59,12 @@
     --warn: #e0866f;
     --warn-soft: #3a211b;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --line-strong: #344a39;
+    --card-line: rgba(255, 255, 255, 0.06);
+    --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+    --shadow-pop: 0 14px 34px -10px rgba(0, 0, 0, 0.7);
+    --nav-bg: rgba(18, 27, 20, 0.9);
+    --focus-ring: rgba(108, 192, 111, 0.3);
     color-scheme: dark;
   }
 }
@@ -77,6 +91,12 @@
   --warn: #e0866f;
   --warn-soft: #3a211b;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --line-strong: #344a39;
+  --card-line: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  --shadow-pop: 0 14px 34px -10px rgba(0, 0, 0, 0.7);
+  --nav-bg: rgba(18, 27, 20, 0.9);
+  --focus-ring: rgba(108, 192, 111, 0.3);
   color-scheme: dark;
 }
 
@@ -144,17 +164,26 @@ h3 {
 
 .topbar.on-hero {
   position: relative;
-  justify-content: center;
+  /* שלוש עמודות: ריקה, הכותרת במרכז (כמו על הכריכה), וכפתור העזרה בפינה.
+     כך הכפתור לא עולה על הכותרת גם בטקסט גדול במסך צר */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
   background: var(--hero);
   color: #fff;
   padding-top: calc(16px + env(safe-area-inset-top));
 }
 
-/* במסך הבית הכותרת במרכז, כמו על הכריכה, וכפתור העזרה בפינה */
+.topbar.on-hero .brand {
+  grid-column: 2;
+}
+
 .topbar.on-hero .sos-btn {
-  position: absolute;
-  top: calc(14px + env(safe-area-inset-top));
-  inset-inline-end: 16px;
+  grid-column: 3;
+  justify-self: end;
+  max-width: 100%;
+  line-height: 1.15;
+  margin-top: -2px;
 }
 
 .brand {
@@ -270,7 +299,7 @@ h3 {
 .hero {
   position: relative;
   overflow: hidden;
-  background: var(--hero);
+  background: radial-gradient(70% 55% at 50% 42%, rgba(255, 255, 255, 0.13), transparent 72%), var(--hero);
   color: #fff;
   padding: 4px 16px 28px;
   border-radius: 0 0 32px 32px;
@@ -395,7 +424,7 @@ h3 {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   padding: 18px 16px 8px;
 }
 
@@ -403,19 +432,21 @@ h3 {
   background: var(--surface);
   border-radius: var(--radius);
   padding: 18px;
-  border: 1.5px solid var(--frame);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--shadow-card);
 }
 
+/* כותרת קטנה של כרטיס. בלי ריווח אותיות: בעברית הוא נראה שבור */
 .card-label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
-  letter-spacing: 0.04em;
   color: var(--green-deep);
   margin: 0 0 6px;
 }
 
 .card h2 {
-  font-size: 22px;
+  font-size: 21px;
+  line-height: 1.3;
   margin-bottom: 8px;
 }
 
@@ -606,22 +637,33 @@ h3 {
   gap: 8px;
   min-height: 48px;
   padding: 10px 22px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: none;
   font-weight: 700;
   font-size: 17px;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .btn-primary {
   background: var(--green);
   color: var(--on-green);
+  box-shadow: 0 8px 18px -10px rgba(47, 129, 53, 0.75);
 }
 
 
 
 .btn-ghost {
-  background: transparent;
-  border: 1.5px solid var(--line);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
 }
 
 .btn-danger {
@@ -664,24 +706,27 @@ input[type='date'],
 input[type='datetime-local'],
 input[type='number'] {
   width: 100%;
-  border: 1.5px solid var(--line);
+  border: 1px solid var(--line-strong);
   background: var(--surface-2);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
   font-size: 16px;
   line-height: 1.5;
-  resize: vertical;
 }
 
 textarea {
   min-height: 84px;
+  /* תיבת כתיבה שגדלה עם הטקסט (בדפדפנים שתומכים), בלי ידית הגדלה */
+  resize: none;
+  field-sizing: content;
+  max-height: 60vh;
 }
 
 textarea:focus,
 input:focus {
-  outline: 2px solid var(--green);
-  outline-offset: 1px;
-  border-color: transparent;
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .saved-hint {
@@ -714,8 +759,10 @@ input:focus {
   position: fixed;
   bottom: 0;
   inset-inline: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--line);
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  border-top: 1px solid var(--card-line);
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 20;
 }
@@ -734,23 +781,33 @@ input:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-  padding: 8px 0 10px;
+  padding: 7px 0 9px;
   white-space: nowrap;
   text-decoration: none;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
 .bottom-nav a[aria-current='page'] {
   color: var(--green-deep);
+  font-weight: 800;
 }
 
+/* הגלולה מתכווצת עם העמודה (בטקסט גדול במסך צר העמודות צרות), והסמל נשאר במרכז */
 .bottom-nav svg {
-  width: 26px;
-  height: 26px;
+  width: 100%;
+  max-width: 58px;
+  height: 30px;
+  padding: 3px 0;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.bottom-nav a[aria-current='page'] svg {
+  background: var(--green-soft);
 }
 
 /* ---------- מסך כותרת פשוט ---------- */
@@ -759,7 +816,8 @@ input:focus {
 }
 
 .page-head h1 {
-  font-size: 32px;
+  font-size: 30px;
+  line-height: 1.2;
   color: var(--green-deep);
 }
 
@@ -937,7 +995,7 @@ input:focus {
 
 .stat {
   text-align: center;
-  padding: 14px 6px;
+  padding: 14px 8px 12px;
 }
 
 .stat b {
@@ -951,7 +1009,9 @@ input:focus {
 }
 
 .stat span {
+  display: block;
   font-size: 13px;
+  line-height: 1.35;
   color: var(--muted);
 }
 
@@ -999,11 +1059,12 @@ input:focus {
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  padding: 12px;
-  border: 1.5px solid var(--line);
-  border-radius: 14px;
+  padding: 13px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
   margin-bottom: 10px;
   cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .choice:has(input:checked) {
@@ -1063,8 +1124,20 @@ input:focus {
   max-height: calc((100dvh - env(safe-area-inset-top, 0px) - 12px) / var(--zoom, 1));
   overflow: auto;
   background: var(--bg);
-  border-radius: 26px 26px 0 0;
-  padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0;
+  padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-pop);
+}
+
+/* ידית בראש החלון התחתון, כמו בחלונות של הטלפון */
+.sheet::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+  margin: 0 auto 10px;
 }
 
 .sheet-head {
@@ -1075,17 +1148,21 @@ input:focus {
 }
 
 .sheet-head h2 {
-  font-size: 26px;
+  font-size: 23px;
+  line-height: 1.25;
   color: var(--green-deep);
 }
 
 .close-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
   border: none;
   background: var(--surface-2);
+  color: var(--text);
   width: var(--tap);
   height: var(--tap);
   border-radius: 50%;
-  font-size: 20px;
 }
 
 .call {
@@ -1242,7 +1319,7 @@ input:focus {
 }
 
 .chip {
-  border: 1.5px solid var(--frame);
+  border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
   border-radius: 999px;
@@ -1287,23 +1364,6 @@ input:focus {
   position: relative;
 }
 
-.counter-name {
-  display: inline-block;
-  background: var(--on-hero-chip);
-  border-radius: 999px;
-  padding: 2px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.clock {
-  font-family: var(--display);
-  font-size: 30px;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-}
-
 .counter-since {
   font-size: 14px;
   opacity: 0.9;
@@ -1313,21 +1373,6 @@ button.stat {
   font: inherit;
   color: inherit;
   cursor: pointer;
-}
-
-.next-ms {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.next-ms h2 {
-  margin: 0;
-}
-
-.bar.big {
-  height: 12px;
 }
 
 .badges {
@@ -1344,27 +1389,59 @@ button.stat {
   text-align: center;
 }
 
-.badge svg {
+/* מדליה: עיגול עם עקבה. הושגה: מלאה בירוק. הבאה: טבעת התקדמות. עתידית: קו מקווקו */
+.medal {
   width: 56px;
   height: 56px;
-  stroke: var(--line);
+  flex: none;
 }
 
-.badge svg circle {
+.medal-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2.5;
+  stroke-dasharray: 3 4;
+}
+
+.medal-progress {
+  fill: none;
+  stroke: var(--green-bright);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 32px 32px;
+}
+
+.medal-face {
   fill: var(--surface-2);
-  stroke: var(--line);
-  stroke-width: 2;
-  stroke-dasharray: 4 3;
 }
 
-.badge.got svg {
-  stroke: var(--green);
+.medal-foot {
+  fill: var(--line-strong);
 }
 
-.badge.got svg circle {
-  fill: var(--green);
-  stroke: var(--green);
+.medal.next .medal-track {
   stroke-dasharray: none;
+  stroke: var(--green-soft);
+  stroke-width: 3.5;
+}
+
+.medal.next .medal-foot {
+  fill: var(--green);
+}
+
+.medal.got .medal-track {
+  stroke: var(--green-bright);
+  stroke-dasharray: none;
+  stroke-width: 2.5;
+}
+
+.medal.got .medal-face {
+  fill: var(--green);
+}
+
+.medal.got .medal-foot {
+  fill: var(--on-green);
 }
 
 .badge-label {
@@ -1374,7 +1451,8 @@ button.stat {
   line-height: 1.2;
 }
 
-.badge.got .badge-label {
+.badge.got .badge-label,
+.badge.next .badge-label {
   color: var(--green-deep);
 }
 
@@ -1401,10 +1479,27 @@ button.stat {
 
 .reason {
   position: relative;
-  border: 1.5px solid var(--frame);
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
   background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+/* סיבה בלי תמונה: אריח צבעוני עם המשפט במרכז */
+.reason.text-only {
+  display: grid;
+  place-items: center;
+  min-height: 128px;
+  background: linear-gradient(160deg, var(--green-soft), var(--surface-2));
+}
+
+.reason.text-only p {
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 19px;
+  color: var(--green-deep);
+  padding: 40px 14px 18px;
 }
 
 .reason img {
@@ -1425,14 +1520,16 @@ button.stat {
 .reason-del {
   position: absolute;
   top: 4px;
-  inset-inline-start: 4px;
-  width: 40px;
-  height: 40px;
+  /* בצד השמאלי: הטקסט מתחיל מימין, והכפתור לא מסתיר אותו */
+  inset-inline-end: 4px;
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.62);
+  background: rgba(0, 0, 0, 0.45);
   color: #fff;
-  font-size: 13px;
 }
 
 .reason-preview {
@@ -1550,13 +1647,15 @@ input[type='range'] {
 }
 
 .pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border-radius: 999px;
   padding: 3px 12px;
   font-size: 14px;
   font-weight: 600;
   background: var(--surface-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--card-line);
 }
 
 .pill.ok {
@@ -1572,9 +1671,11 @@ input[type='range'] {
 }
 
 /* תובנות */
+/* כותרת של קבוצת כרטיסים, מחוץ לכרטיס */
 .section-title {
-  font-weight: 700;
-  margin: 8px 2px 0;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 10px 4px -4px;
 }
 
 .mood-strip {

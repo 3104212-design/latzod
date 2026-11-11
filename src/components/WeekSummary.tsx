@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Sheet } from './Sheet';
 import { FootIcon } from './Visuals';
+import { I } from './Icons';
 import { addDays, formatShort, fromISO, toISO, todayISO, type ISODate } from '../lib/dates';
 import { daysLabel, MOODS } from '../lib/sobriety';
 import { setState, useAppState, type AppState } from '../lib/store';
@@ -121,11 +122,11 @@ export function WeekSheet({ onClose, initialOffset = 0 }: { onClose: () => void;
       <div className="card week-card">
         <div className="week-nav">
           <button className="icon-btn soft" onClick={() => setOffset(offset - 1)} aria-label="שבוע קודם">
-            ›
+            {I.back()}
           </button>
           <span className="week-range">{range}</span>
           <button className="icon-btn soft" disabled={current} onClick={() => setOffset(offset + 1)} aria-label="שבוע הבא">
-            ‹
+            {I.forward()}
           </button>
         </div>
         <WeekStrip w={w} />
@@ -162,18 +163,18 @@ export function WeekSheet({ onClose, initialOffset = 0 }: { onClose: () => void;
           {w.mood ? `מצב הרוח הממוצע: ${w.mood.label}` : 'מצב הרוח יופיע כאן אחרי סיכומי ערב.'}
         </p>
         <p>
-          <span aria-hidden="true">✎</span>
+          <span aria-hidden="true">{I.pen()}</span>
           {w.words ? `נכתבו ${w.words.toLocaleString('he-IL')} מילים ביומן` : 'עוד לא נכתב ביומן השבוע.'}
         </p>
         {w.topTrigger && (
           <p>
-            <span aria-hidden="true">⚑</span>
+            <span aria-hidden="true">{I.flag()}</span>
             מה הכי הפעיל: {w.topTrigger[0]} ({w.topTrigger[1] === 1 ? 'פעם אחת' : `${w.topTrigger[1]} פעמים`})
           </p>
         )}
         {w.cravings > 0 && (
           <p>
-            <span aria-hidden="true">♡</span>
+            <span aria-hidden="true">{I.heart()}</span>
             {w.cravings === 1 ? 'דחף אחד נרשם' : `${w.cravings} דחפים נרשמו`} בחלון "עזרה עכשיו"
           </p>
         )}
@@ -205,11 +206,11 @@ export function WeekReadyCard({ onOpen }: { onOpen: () => void }) {
       >
         <span className="card-label">הסיכום השבועי מוכן</span>
         <span className="week-ready-text">
-          {w.done ? `${daysLabel(w.done)} שהושלמו בשבוע שעבר` : `${w.pledged === 1 ? 'התחייבות אחת' : `${w.pledged} התחייבויות`} בשבוע שעבר`}. לצפייה ›
+          {w.done ? `${daysLabel(w.done)} שהושלמו בשבוע שעבר` : `${w.pledged === 1 ? 'התחייבות אחת' : `${w.pledged} התחייבויות`} בשבוע שעבר`}. לצפייה
         </span>
       </button>
       <button className="close-btn" onClick={seen} aria-label="הסתרת הסיכום השבועי">
-        ✕
+        {I.close()}
       </button>
     </div>
   );

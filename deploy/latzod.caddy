@@ -1,10 +1,19 @@
 # האתר "לצעוד לתוך היום" בשרת הענן. הקובץ נטען מתוך /etc/caddy/Caddyfile בשורה:
 #   import /etc/caddy/sites/*.caddy
 # הקבצים עצמם ב-/opt/latzod/current (קישור לגרסה האחרונה ב-/opt/latzod/releases).
+# /api מועבר לשירות ההזמנות המקומי בפורט 3741.
 latzod.64-176-173-124.sslip.io {
 	encode gzip
-	root * /opt/latzod/current
-	file_server
+
+	# שירות ההזמנות החד פעמיות (server/invites.mjs, יחידת systemd latzod-invites)
+	handle /api/* {
+		reverse_proxy 127.0.0.1:3741
+	}
+
+	handle {
+		root * /opt/latzod/current
+		file_server
+	}
 
 	header {
 		X-Content-Type-Options nosniff

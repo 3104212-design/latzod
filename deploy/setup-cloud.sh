@@ -17,6 +17,7 @@ set -euo pipefail
 STAMP=\$(date +%Y%m%d-%H%M%S)
 cp -a /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak-\$STAMP
 mkdir -p /etc/caddy/sites /opt/latzod/releases
+cp -a /etc/caddy/sites/latzod.caddy /etc/caddy/sites/latzod.caddy.bak-\$STAMP 2>/dev/null || true
 cat > /etc/caddy/sites/latzod.caddy <<'CADDY'
 $(cat "$ROOT/deploy/latzod.caddy")
 CADDY
@@ -26,7 +27,8 @@ if caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/tmp/latzod
   echo "ההגדרות תקינות ונטענו. עותק: /etc/caddy/Caddyfile.bak-\$STAMP"
 else
   cp -a /etc/caddy/Caddyfile.bak-\$STAMP /etc/caddy/Caddyfile
-  rm -f /etc/caddy/sites/latzod.caddy
+  # מחזירים את קובץ האתר הקודם אם היה (מחיקה הייתה מורידה את האתר)
+  if [ -f /etc/caddy/sites/latzod.caddy.bak-\$STAMP ]; then cp -a /etc/caddy/sites/latzod.caddy.bak-\$STAMP /etc/caddy/sites/latzod.caddy; else rm -f /etc/caddy/sites/latzod.caddy; fi
   echo "ההגדרות לא תקינות, הכל הוחזר:"; tail -5 /tmp/latzod-validate.log; exit 1
 fi
 EOF

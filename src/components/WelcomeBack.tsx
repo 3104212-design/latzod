@@ -2,6 +2,7 @@
 // (בלי כפתור משלו: כפתור הצעידה נמצא ממש מעליו, בראש המסך)
 
 import { daysLabel } from '../lib/sobriety';
+import { I } from './Icons';
 import { useAppState } from '../lib/store';
 import { dismissWelcome, useWelcomeGap } from '../lib/visits';
 
@@ -15,7 +16,7 @@ export function WelcomeBack() {
       <div className="welcome-head">
         <p className="card-label">טוב שחזרת{name ? `, ${name}` : ''}</p>
         <button className="close-btn" onClick={dismissWelcome} aria-label="סגירה">
-          ✕
+          {I.close()}
         </button>
       </div>
       <p>

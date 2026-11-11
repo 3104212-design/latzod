@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { getStep } from '../content/steps';
 import { TopBar } from '../components/Chrome';
 import { Insights } from '../components/Insights';
+import { I } from '../components/Icons';
 import { WeekSheet, weekStart, weekStats, WeekStrip } from '../components/WeekSummary';
 import { formatHebrew, formatLong, todayISO } from '../lib/dates';
 import { positionFor } from '../lib/program';
@@ -62,7 +63,9 @@ export function JournalScreen({ onSos }: { onSos: () => void }) {
         <button className="card week-open" onClick={() => setWeek(true)}>
           <span className="week-open-head">
             <span className="card-label">השבוע שלי</span>
-            <span className="small">לסיכום השבוע ›</span>
+            <span className="small week-open-go">
+              לסיכום השבוע {I.forward({ size: 16 })}
+            </span>
           </span>
           <WeekStrip w={thisWeek} />
         </button>

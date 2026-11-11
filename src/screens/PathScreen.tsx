@@ -3,6 +3,7 @@
 import { HEBREW_MONTHS, STEPS, getStep } from '../content/steps';
 import { TopBar } from '../components/Chrome';
 import { TitleBadge } from '../components/Brand';
+import { I } from '../components/Icons';
 import { formatShort, todayISO } from '../lib/dates';
 import { positionFor, stepDates, type TrackSettings } from '../lib/program';
 import { trackOf, useAppState, type AppState } from '../lib/store';
@@ -65,7 +66,7 @@ export function PathScreen({ onSos }: { onSos: () => void }) {
               href={`#/step/${step.number}`}
               className={`trail-item${isCur ? ' current' : ''}${complete ? ' complete' : ''}`}
             >
-              <span className="trail-node">{complete ? '✓' : step.number}</span>
+              <span className="trail-node">{complete ? I.check({ size: 18 }) : step.number}</span>
               <div className="card trail-card">
                 <div className="trail-top">
                   <span className="trail-month">

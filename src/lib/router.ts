@@ -5,6 +5,7 @@ import { useSyncExternalStore } from 'react';
 export type Route =
   | { name: 'today' }
   | { name: 'walk' }
+  | { name: 'join'; invite: string }
   | { name: 'day'; date: string }
   | { name: 'clean' }
   | { name: 'path' }
@@ -20,6 +21,9 @@ function parse(hash: string): Route {
       break;
     case 'walk':
       return { name: 'walk' };
+    case 'join':
+      if (parts[1]) return { name: 'join', invite: parts[1] };
+      break;
     case 'clean':
       return { name: 'clean' };
     case 'path':

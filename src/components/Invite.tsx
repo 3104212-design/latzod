@@ -1,19 +1,29 @@
-// להזמין מישהו: שליחת הקישור לאפליקציה, העתקה, או קוד QR להראות פנים אל פנים (למשל בפגישה).
-// כל מי שפותח את הקישור בטלפון שלו מקבל אפליקציה נקייה ופרטית משלו. שום נתון לא נשלח עם ההזמנה.
+// הזמנות חד פעמיות (רק בטלפון של המנהל): שליחה, העתקה או קוד QR, ורשימת ההזמנות עם מצב וביטול.
+// הזמנה אחת תמיד מוכנה מראש, כדי שתפריט השיתוף ייפתח ישר מהלחיצה (אייפון דורש זאת).
+// כל הזמנה פותחת את האפליקציה פעם אחת, לאדם אחד. שום נתון מתוך האפליקציה לא נשלח עם ההזמנה.
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import qrcode from 'qrcode-generator';
+import { I } from './Icons';
 import { Sheet } from './Sheet';
+import { formatShort, toISO } from '../lib/dates';
 import { toast } from '../lib/feedback';
-
-/** הכתובת של האפליקציה עצמה, בלי מסך מסוים (בענן או ב-GitHub Pages, לפי איפה שהיא פתוחה) */
-export function appLink(): string {
-  return new URL('./', location.href.split('#')[0]).href;
-}
+import {
+  createInvite,
+  INVITE_ERRORS,
+  inviteLink,
+  leaveAdmin,
+  listInvites,
+  markGiven,
+  pairAdmin,
+  revokeInvite,
+  type Invite,
+} from '../lib/invites';
+import { setState, useAppState } from '../lib/store';
 
 /** נוסח ההזמנה: רק על האפליקציה, בלי לחשוף משהו על מי ששולח */
 export const INVITE_TEXT =
-  '"לצעוד לתוך היום": 12 צעדים, 12 חודשים, רק להיום. ספירת ימים נקיים, קריאה, שאלון ותפילה לכל יום. האפליקציה פרטית לגמרי: הכל נשמר רק בטלפון שלך, בלי הרשמה ובלי חשבון.';
+  '"לצעוד לתוך היום": 12 צעדים, 12 חודשים, רק להיום. ספירת ימים נקיים, קריאה, שאלון ותפילה לכל יום. ההזמנה אישית ופותחת את האפליקציה פעם אחת. הכל נשמר רק בטלפון שלך, בלי הרשמה ובלי חשבון.';
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -39,14 +49,56 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function InviteCard() {
-  const [qr, setQr] = useState(false);
-  const link = appLink();
+const dateOf = (iso?: string) => (iso ? formatShort(toISO(new Date(iso))) : '');
+
+/** כרטיס ההזמנות במסך "עוד". מוצג רק במצב מנהל */
+export function InviteAdminCard() {
+  const s = useAppState();
+  const ready = s.admin?.ready;
+  const [note, setNote] = useState('');
+  const [preparing, setPreparing] = useState(false);
+  const [list, setList] = useState<Invite[] | null>(null);
+  const [qr, setQr] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    const r = await listInvites();
+    if (r.ok) setList(r.data.invites);
+    else if (r.error === 'not-admin') {
+      toast(INVITE_ERRORS['not-admin']);
+      leaveAdmin();
+    }
+  }, []);
+
+  /** מכינים את ההזמנה הבאה ברקע */
+  const prepare = useCallback(async () => {
+    setPreparing(true);
+    const r = await createInvite();
+    setPreparing(false);
+    if (r.ok) setState((x) => ({ ...x, admin: x.admin && { ...x.admin, ready: r.data.code } }));
+    else if (r.error !== 'network') toast(INVITE_ERRORS[r.error]);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    if (!ready) prepare();
+  }, []);
+
+  /** ההזמנה המוכנה יצאה לדרך: נרשמת בשרת כ"נשלחה", ומכינים חדשה */
+  const given = (code: string) => {
+    setState((x) => ({ ...x, admin: x.admin && { ...x.admin, ready: undefined } }));
+    const n = note.trim() || undefined;
+    setNote('');
+    markGiven(code, n).then(refresh);
+    prepare();
+  };
 
   const send = async () => {
+    if (!ready) return;
+    const link = inviteLink(ready);
     if (navigator.share) {
       try {
         await navigator.share({ title: 'לצעוד לתוך היום', text: INVITE_TEXT, url: link });
+        given(ready);
         return;
       } catch (e) {
         if ((e as Error).name === 'AbortError') return;
@@ -54,35 +106,104 @@ export function InviteCard() {
     }
     // בלי תפריט שיתוף (למשל במחשב): וואטסאפ עם ההודעה מוכנה
     window.open(`https://wa.me/?text=${encodeURIComponent(`${INVITE_TEXT}\n${link}`)}`, '_blank', 'noopener');
+    given(ready);
   };
+
+  const copy = async () => {
+    if (!ready) return;
+    if (await copyText(inviteLink(ready))) {
+      toast('הקישור הועתק. הוא עובד פעם אחת.');
+      given(ready);
+    } else toast('לא הצלחנו להעתיק. אפשר להראות קוד QR.');
+  };
+
+  const sent = (list ?? []).filter((x) => x.code !== ready && (x.givenAt || x.usedAt || x.revoked));
+  const busy = !ready;
 
   return (
     <section className="card invite">
-      <p className="card-label">להזמין מישהו</p>
-      <p className="muted small">
-        כל מי שמקבל את הקישור ופותח אותו בטלפון שלו מקבל אפליקציה נקייה משלו: ספירה, יומן והגדרות חדשים. שום דבר ממה
-        שנשמר אצלך לא נשלח, ואף אחד לא רואה את הנתונים של אחרים.
-      </p>
-      <button className="btn btn-primary btn-block" onClick={send}>
-        שליחת הזמנה
+      <p className="card-label">הזמנה חדשה</p>
+      <p className="muted small">כל הזמנה עובדת פעם אחת, לאדם אחד. מי שמקבל אותה מקבל אפליקציה נקייה ופרטית משלו.</p>
+      <div className="field">
+        <label htmlFor="inv-note">למי ההזמנה? (לא חובה, רק בשבילך)</label>
+        <input id="inv-note" type="text" maxLength={40} value={note} onChange={(e) => setNote(e.target.value)} />
+      </div>
+      <button className="btn btn-primary btn-block" disabled={busy} onClick={send}>
+        {I.share({ size: 20 })}
+        {busy ? (preparing ? 'מכינים הזמנה…' : 'אין חיבור לשרת') : 'שליחת הזמנה'}
       </button>
       <div className="row invite-row">
+        <button className="btn btn-ghost" disabled={busy} onClick={copy}>
+          {I.copy({ size: 20 })}
+          העתקה
+        </button>
         <button
           className="btn btn-ghost"
-          onClick={async () => toast((await copyText(link)) ? 'הקישור הועתק' : 'לא הצלחנו להעתיק. אפשר להראות קוד QR.')}
+          disabled={busy}
+          onClick={() => {
+            if (!ready) return;
+            setQr(inviteLink(ready));
+            given(ready);
+          }}
         >
-          העתקת הקישור
-        </button>
-        <button className="btn btn-ghost" onClick={() => setQr(true)}>
+          {I.qr({ size: 20 })}
           קוד QR
         </button>
       </div>
-      {qr && <QrSheet link={link} onClose={() => setQr(false)} />}
+      {busy && !preparing && (
+        <button className="btn btn-ghost btn-block" style={{ marginTop: 10 }} onClick={prepare}>
+          לנסות שוב
+        </button>
+      )}
+
+      {sent.length > 0 && (
+        <>
+          <p className="card-label invite-list-title">ההזמנות ששלחת</p>
+          <ul className="invite-list">
+            {sent.map((x) => (
+              <li key={x.code}>
+                <span className="invite-who">
+                  <b>{x.note || 'הזמנה'}</b>
+                  <span className="muted small">נשלחה {dateOf(x.givenAt ?? x.created)}</span>
+                </span>
+                {x.usedAt ? (
+                  <span className="pill ok">נפתחה {dateOf(x.usedAt)}</span>
+                ) : x.revoked ? (
+                  <span className="pill">בוטלה</span>
+                ) : (
+                  <span className="invite-pending">
+                    <span className="pill">ממתינה</span>
+                    <button
+                      className="btn-link"
+                      onClick={async () => {
+                        if (!confirm('לבטל את ההזמנה? הקישור יפסיק לעבוד.')) return;
+                        const r = await revokeInvite(x.code);
+                        if (!r.ok) toast(INVITE_ERRORS[r.error]);
+                        refresh();
+                      }}
+                    >
+                      ביטול
+                    </button>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <button
+        className="btn-link invite-leave"
+        onClick={() => confirm('לצאת ממצב מנהל במכשיר הזה? כדי לחזור צריך קוד ניהול חדש.') && leaveAdmin()}
+      >
+        יציאה ממצב מנהל
+      </button>
+      {qr && <QrSheet link={qr} onClose={() => setQr(null)} />}
     </section>
   );
 }
 
-/** קוד QR גדול: סורקים במצלמה של הטלפון, והאפליקציה נפתחת */
+/** קוד QR גדול: סורקים במצלמה של הטלפון, והאפליקציה נפתחת. גם הוא חד פעמי */
 function QrSheet({ link, onClose }: { link: string; onClose: () => void }) {
   const { n, path } = useMemo(() => {
     const q = qrcode(0, 'M');
@@ -98,15 +219,60 @@ function QrSheet({ link, onClose }: { link: string; onClose: () => void }) {
     <Sheet title="קוד להזמנה" onClose={onClose}>
       <div className="card qr-card">
         {/* שחור על לבן גם במצב כהה, עם שוליים, כדי שכל מצלמה תזהה */}
-        <svg className="qr" viewBox={`-4 -4 ${n + 8} ${n + 8}`} role="img" aria-label="קוד QR לקישור של האפליקציה" shapeRendering="crispEdges">
+        <svg className="qr" viewBox={`-4 -4 ${n + 8} ${n + 8}`} role="img" aria-label="קוד QR להזמנה" shapeRendering="crispEdges">
           <rect x="-4" y="-4" width={n + 8} height={n + 8} fill="#fff" />
           <path d={path} fill="#111" />
         </svg>
-        <p>מכוונים את המצלמה של הטלפון לקוד, והאפליקציה נפתחת. כל אחד מקבל מערכת נקייה משלו.</p>
-        <p className="qr-link" dir="ltr">
-          {link}
-        </p>
+        <p>מכוונים את המצלמה של הטלפון לקוד, והאפליקציה נפתחת. הקוד עובד פעם אחת, לאדם אחד.</p>
       </div>
+    </Sheet>
+  );
+}
+
+/** כניסה למצב מנהל עם קוד ניהול חד פעמי (נפתח בחמש לחיצות על מספר הגרסה) */
+export function AdminPairSheet({ onClose }: { onClose: () => void }) {
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  return (
+    <Sheet title="כניסת מנהל" onClose={onClose}>
+      <form
+        className="card"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setBusy(true);
+          setErr('');
+          const r = await pairAdmin(code);
+          setBusy(false);
+          if (r.ok) {
+            toast('מצב מנהל פעיל. אפשר ליצור הזמנות במסך "עוד".');
+            onClose();
+          } else setErr(INVITE_ERRORS[r.error]);
+        }}
+      >
+        <p className="muted small">קוד הניהול עובד פעם אחת, ומחבר את הטלפון הזה ליצירת הזמנות.</p>
+        {err && (
+          <p className="warn-note" role="alert">
+            {err}
+          </p>
+        )}
+        <div className="field">
+          <label htmlFor="pair-code">קוד ניהול</label>
+          <input
+            id="pair-code"
+            type="text"
+            dir="ltr"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+        </div>
+        <button className="btn btn-primary btn-block" disabled={busy || code.trim().length < 8}>
+          {busy ? 'מתחברים…' : 'חיבור'}
+        </button>
+      </form>
     </Sheet>
   );
 }

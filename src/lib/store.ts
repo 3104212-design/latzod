@@ -89,6 +89,10 @@ export interface AppState {
   lastSeen?: ISODate;
   /** תחילת השבוע (יום ראשון) שהסיכום השבועי שלו כבר הוצג */
   weekSeen?: ISODate;
+  /** כניסה עם הזמנה חד פעמית: הקוד ומפתח המושב (למקרה של כניסה נוספת של אותו אדם) */
+  access?: { code: string; seat: string; at: string; tipDone?: boolean };
+  /** מצב מנהל: רק בטלפון של בעל האפליקציה. ready: הזמנה מוכנה לשליחה (כדי שהשיתוף ייפתח ישר מהלחיצה) */
+  admin?: { token: string; ready?: string };
   days: Record<ISODate, DayRecord>;
   /** תוכן יומי שהוזן במצב עריכה. מפתח: "<צעד>-<יום>" */
   content: Record<string, DayContent>;
@@ -236,12 +240,16 @@ export function updateDay(date: ISODate, patch: (d: DayRecord) => DayRecord) {
 }
 
 export function resetAll() {
+  // מי שכבר השתמש באפליקציה לפני ההזמנות (בלי רשומת הזמנה) נשאר בפנים גם אחרי מחיקה
+  const access = state.access ?? (state.onboarded ? { code: 'legacy', seat: '', at: new Date().toISOString(), tipDone: true } : undefined);
+  const keep = { access, admin: state.admin };
   try {
     localStorage.removeItem(KEY);
   } catch {
     /* ignore */
   }
-  setState(DEFAULT_STATE);
+  // ההזמנה ומצב המנהל שייכים למכשיר, לא לנתונים: בלעדיהם המשתמש היה ננעל בחוץ אחרי מחיקה
+  setState({ ...DEFAULT_STATE, ...keep });
 }
 
 function subscribe(l: () => void) {

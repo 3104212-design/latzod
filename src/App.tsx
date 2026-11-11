@@ -5,7 +5,10 @@ import { LockGate } from './components/Lock';
 import { SosSheet } from './components/SosSheet';
 import { DocumentSync, MilestoneWatcher, WhatsNew } from './components/Watchers';
 import { todayISO } from './lib/dates';
-import { useRoute } from './lib/router';
+import { replaceRoute, useRoute } from './lib/router';
+import { usePwa } from './lib/pwa';
+import { toast } from './lib/feedback';
+import { InviteGate, IosInstallTip } from './screens/InviteGate';
 import { useAppState } from './lib/store';
 import { noteVisit } from './lib/visits';
 import { CounterScreen } from './screens/CounterScreen';
@@ -49,13 +52,26 @@ function Shell() {
   const s = useAppState();
   const route = useRoute();
   const today = useToday();
+  const pwa = usePwa();
   const [sos, setSos] = useState(false);
   const openSos = useCallback(() => setSos(true), []);
   const closeSos = useCallback(() => setSos(false), []);
   // "טוב שחזרת": בודקים בפתיחה ובכל פעם שהיום מתחלף
   useEffect(() => noteVisit(), [today, s.onboarded]);
+  // קישור הזמנה במכשיר שהאפליקציה כבר פתוחה בו: לא מנצלים אותו
+  useEffect(() => {
+    if (s.onboarded && route.name === 'join') {
+      replaceRoute('#/');
+      toast('האפליקציה כבר פתוחה במכשיר הזה. את ההזמנה כדאי להעביר למי שהיא נועדה לו.');
+    }
+  }, [s.onboarded, route.name]);
 
-  if (!s.onboarded) return <Onboarding />;
+  // משתמש חדש: קודם הזמנה (פעם אחת לכל הזמנה), ורק אז מסכי הפתיחה. מי שכבר משתמש לא נחסם
+  if (!s.onboarded) {
+    if (!s.access && !s.admin) return <InviteGate invite={route.name === 'join' ? route.invite : undefined} />;
+    if (s.access && pwa.ios && !pwa.standalone && !s.access.tipDone) return <IosInstallTip />;
+    return <Onboarding />;
+  }
 
   let screen;
   let key: string = route.name;

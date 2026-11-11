@@ -1,0 +1,24 @@
+# שירות ההזמנות החד פעמיות של "לצעוד לתוך היום". רץ ליד רשת הסוכנים, בלי לגעת בה.
+# משתמש זמני משלו (DynamicUser), כתיבה רק לתיקיית המצב שלו, האזנה רק מקומית (Caddy מעביר אליו את /api).
+[Unit]
+Description=latzod invites (one-time invites)
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/node /opt/latzod/invites/invites.mjs
+Environment=PORT=3741 HOST=127.0.0.1 STATE_DIR=/var/lib/latzod-invites
+DynamicUser=yes
+StateDirectory=latzod-invites
+StateDirectoryMode=0700
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+Restart=on-failure
+RestartSec=3
+MemoryMax=96M
+
+[Install]
+WantedBy=multi-user.target

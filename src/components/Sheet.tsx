@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useBackClose } from '../lib/overlay';
+import { I } from './Icons';
 
 export function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   useBackClose(onClose);
@@ -31,7 +32,7 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
         <div className="sheet-head">
           <h2>{title}</h2>
           <button ref={closeBtn} className="close-btn" onClick={onClose} aria-label="סגירה">
-            ✕
+            {I.close()}
           </button>
         </div>
         <div className="stack" style={{ padding: 0 }}>

@@ -3,6 +3,7 @@
 import { useNow } from '../lib/hooks';
 import { breakdown, cleanDaysWord, durationLabel, elapsedMs, nextMilestone } from '../lib/sobriety';
 import { useAppState } from '../lib/store';
+import { I } from './Icons';
 
 export function TrackerSummary() {
   const s = useAppState();
@@ -17,7 +18,7 @@ export function TrackerSummary() {
             להתחיל לספור, ולראות כמה כסף וזמן נחסכו
           </span>
         </span>
-        <span aria-hidden="true">‹</span>
+        {I.forward()}
       </a>
     );
   }

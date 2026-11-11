@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { dismissToast, endCelebration, useCelebration, useToasts } from '../lib/feedback';
+import { I } from './Icons';
 
 export function Toasts() {
   const toasts = useToasts();
@@ -23,7 +24,7 @@ export function Toasts() {
           )}
           {!t.ms && (
             <button className="toast-close" aria-label="סגירה" onClick={() => dismissToast(t.id)}>
-              ✕
+              {I.close({ size: 18 })}
             </button>
           )}
         </div>
