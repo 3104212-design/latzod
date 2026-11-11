@@ -1,6 +1,6 @@
 // גרסת האפליקציה ורשימת החידושים שמוצגת פעם אחת אחרי עדכון.
 
-export const APP_VERSION = '2.0.2';
+export const APP_VERSION = '2.0.3';
 
 export const WHATS_NEW: { title: string; text: string }[] = [
   { title: 'המסלול של היום', text: 'חמישה צעדים קטנים בכל יום: התחייבות, קריאה, שאלון, תפילה וסיכום ערב. רואים מה נשאר, ובסוף יש חגיגה קטנה.' },

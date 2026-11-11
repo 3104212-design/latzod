@@ -124,5 +124,19 @@ export function audit({ minTap = 40 } = {}) {
 
   for (const img of document.querySelectorAll('img')) if (!img.hasAttribute('alt')) add('תמונה בלי alt', img);
 
+  // חלונות צפים: חייבים להיות בתוך המסך, ולהיות העליונים בנקודת המרכז שלהם
+  const vh = window.innerHeight;
+  for (const sheet of document.querySelectorAll('.sheet, .celebrate-card, .lock-screen')) {
+    const r = sheet.getBoundingClientRect();
+    if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) {
+      add('חלון מחוץ למסך', sheet, `[top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)}, vh ${vh}]`);
+      continue;
+    }
+    const x = Math.min(Math.max(r.left + r.width / 2, 1), vw - 1);
+    const y = Math.min(Math.max(r.top + Math.min(r.height / 2, 40), 1), vh - 1);
+    const hit = document.elementFromPoint(x, y);
+    if (hit && !sheet.contains(hit)) add('חלון מוסתר מאחורי רכיב אחר', sheet, desc(hit));
+  }
+
   return issues;
 }

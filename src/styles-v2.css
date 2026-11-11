@@ -4,28 +4,27 @@
 
 /* ---------- גודל טקסט ---------- */
 :root[data-size='large'] .app,
-:root[data-size='large'] .lock-screen {
+:root[data-size='large'] .lock-screen,
+:root[data-size='large'] .sheet-backdrop {
   zoom: 1.12;
 }
 
 :root[data-size='xlarge'] .app,
-:root[data-size='xlarge'] .lock-screen {
+:root[data-size='xlarge'] .lock-screen,
+:root[data-size='xlarge'] .sheet-backdrop {
   zoom: 1.25;
 }
 
 /* ---------- מעבר בין מסכים ---------- */
+/* רק שקיפות, ובלי להשאיר מצב אחרי הסוף: אנימציה של transform שנשארת בתוקף הופכת את המסך
+   למסגרת של חלונות "צפים" (position: fixed), והם נפתחו מחוץ למסך */
 .route {
-  animation: route-in 0.22s ease-out both;
+  animation: route-in 0.2s ease-out;
 }
 
 @keyframes route-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -509,7 +508,8 @@
 .lock-screen {
   position: fixed;
   inset: 0;
-  z-index: 95;
+  /* מתחת לחלונות (50), כדי שחלון "שכחתי את הקוד" ייפתח מעליו */
+  z-index: 48;
   background: var(--hero);
   color: #fff;
   display: flex;

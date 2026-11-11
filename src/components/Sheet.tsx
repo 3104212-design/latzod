@@ -1,6 +1,7 @@
 // חלון תחתון כללי (bottom sheet), נסגר בלחיצה על הרקע או ב-Escape.
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useBackClose } from '../lib/overlay';
 
 export function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
@@ -23,7 +24,8 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
     };
   }, [onClose]);
 
-  return (
+  // החלון מוצג ישירות תחת body, כדי ששום מסך או אנימציה לא יגבילו את המיקום שלו
+  return createPortal(
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
@@ -36,7 +38,8 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
