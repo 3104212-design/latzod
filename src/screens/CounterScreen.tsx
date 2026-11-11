@@ -5,6 +5,8 @@ import { TopBar } from '../components/Chrome';
 import { ChipPicker, Sheet } from '../components/Sheet';
 import { I } from '../components/Icons';
 import { Dial, Feet } from '../components/Visuals';
+import { Medal } from '../components/Medal';
+import { CardTag } from '../components/CardTag';
 import { formatLong, nowInputValue, toISO } from '../lib/dates';
 import { compressImage, useNow } from '../lib/hooks';
 import { celebrate, toast } from '../lib/feedback';
@@ -12,6 +14,9 @@ import { renderShareImage, shareImage } from '../lib/shareImage';
 import {
   DAY_MS,
   MILESTONES,
+  MILESTONE_LEVELS,
+  levelOf,
+  milestonesOf,
   TRIGGERS,
   breakdown,
   cleanDaysWord,
@@ -131,23 +136,11 @@ export function CounterScreen({ onSos }: { onSos: () => void }) {
   );
 }
 
-function Medal({ state, progress = 0 }: { state: 'got' | 'next' | 'future'; progress?: number }) {
-  const r = 27;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg className={`medal ${state}`} viewBox="0 0 64 64" aria-hidden="true">
-      <circle className="medal-track" cx="32" cy="32" r={r} />
-      {state === 'next' && (
-        <circle className="medal-progress" cx="32" cy="32" r={r} strokeDasharray={c} strokeDashoffset={c * (1 - Math.min(1, progress))} />
-      )}
-      <circle className="medal-face" cx="32" cy="32" r="21" />
-      <g className="medal-foot" transform="translate(26.5 19) scale(0.095)">
-        <path d="M60 0C96 0 118 30 118 74c0 38-14 64-18 86H20C16 138 2 112 2 74 2 30 24 0 60 0Z" />
-        <rect x="18" y="174" width="84" height="66" rx="26" />
-      </g>
-    </svg>
-  );
-}
+/** "מ" לפני תווית: "משנה", "מ-3 חודשים" (לפני מספר בא מקף) */
+const fromLabel = (label: string) => (/^\d/.test(label) ? `מ-${label}` : `מ${label}`);
+
+/** סמל לכל רמה, בכמוסה של הכרטיס */
+const LEVEL_ICONS = [I.sparkle, I.flag, I.heart, I.trophy];
 
 function TrackerView({
   t,
@@ -225,20 +218,20 @@ function TrackerView({
 
       <div className="card ms-pair">
         {last && (
-          <div className="ms-row">
-            <Medal state="got" />
+          <div className={`ms-row lvl-${levelOf(last.days).level}`}>
+            <Medal state="got" level={levelOf(last.days).level} major={last.major} />
             <span className="ms-body">
-              <span className="ms-kicker">אבן הדרך האחרונה</span>
+              <span className="ms-kicker">אבן הדרך האחרונה · {levelOf(last.days).name}</span>
               <b>{last.label}</b>
               <span className="muted small">הושגה ב{reachedOn(last.days)}</span>
             </span>
           </div>
         )}
         {next ? (
-          <div className="ms-row">
-            <Medal state="next" progress={next.progress} />
+          <div className={`ms-row lvl-${levelOf(next.days).level}`}>
+            <Medal state="next" level={levelOf(next.days).level} major={next.major} progress={next.progress} />
             <span className="ms-body">
-              <span className="ms-kicker">אבן הדרך הבאה</span>
+              <span className="ms-kicker">אבן הדרך הבאה · {levelOf(next.days).name}</span>
               <b>{next.label}</b>
               <span className="muted small">עוד {durationLabel(next.remainingMs)}</span>
               <span className="bar" aria-hidden="true">
@@ -279,27 +272,53 @@ function TrackerView({
       </div>
 
       <p className="section-title">אבני דרך</p>
-      <div className="card">
-        <div className="badges">
-          {MILESTONES.map((m) => {
-            const got = days >= m.days;
-            const isNext = !got && next?.days === m.days;
-            return (
-              <div
-                key={m.days}
-                className={`badge${got ? ' got' : ''}${isNext ? ' next' : ''}`}
-                aria-label={`${m.label}: ${got ? `הושגה ב${reachedOn(m.days)}` : isNext ? 'הבאה בתור' : 'עוד לא'}`}
-                role="img"
-              >
-                <Medal state={got ? 'got' : isNext ? 'next' : 'future'} progress={isNext ? next?.progress : undefined} />
-                <span className="badge-label" aria-hidden="true">
-                  {m.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {MILESTONE_LEVELS.map((lv, li) => {
+        const list = milestonesOf(lv.level);
+        const gotCount = list.filter((m) => days >= m.days).length;
+        const status = gotCount === list.length ? 'done' : gotCount > 0 || (next && levelOf(next.days).level === lv.level) ? 'current' : 'locked';
+        return (
+          <section key={lv.level} className={`card cat ms-level lvl-${lv.level} ${status}`} aria-label={`רמה ${lv.level}: ${lv.name}`}>
+            <CardTag icon={LEVEL_ICONS[li]({ size: 18 })} as="p">
+              רמה {lv.level} · {lv.name}
+            </CardTag>
+            <p className="ms-level-sub">
+              {status === 'done' ? (
+                <>
+                  {I.check({ size: 16 })} הרמה הושלמה: {list.length === 1 ? 'אבן הדרך' : `כל ${list.length} אבני הדרך`}
+                </>
+              ) : status === 'current' ? (
+                `${gotCount} מתוך ${list.length} אבני דרך`
+              ) : (
+                `${list.length} אבני דרך, ${fromLabel(list[0].label)} עד ${list[list.length - 1].label}`
+              )}
+            </p>
+            <div className="badges">
+              {list.map((m) => {
+                const got = days >= m.days;
+                const isNext = !got && next?.days === m.days;
+                return (
+                  <div
+                    key={m.days}
+                    className={`badge${got ? ' got' : ''}${isNext ? ' next' : ''}${m.major ? ' major' : ''}`}
+                    aria-label={`${m.label}${m.major ? ' (אבן דרך מרכזית)' : ''}: ${got ? `הושגה ב${reachedOn(m.days)}` : isNext ? 'הבאה בתור' : 'עוד לא'}`}
+                    role="img"
+                  >
+                    <Medal
+                      state={got ? 'got' : isNext ? 'next' : 'future'}
+                      level={lv.level}
+                      major={m.major}
+                      progress={isNext ? next?.progress : undefined}
+                    />
+                    <span className="badge-label" aria-hidden="true">
+                      {m.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
 
       <label className="toggle share-name">
         <span className="small">להציג בתמונת השיתוף ממה מתנקים</span>

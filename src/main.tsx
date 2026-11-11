@@ -9,6 +9,7 @@ import './styles-ios.css';
 import './styles-v21.css';
 import './styles-v23.css';
 import './styles-v24.css';
+import './styles-v25.css';
 import { App } from './App';
 import { registerServiceWorker } from './lib/pwa';
 

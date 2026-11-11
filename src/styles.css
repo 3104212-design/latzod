@@ -1376,86 +1376,7 @@ button.stat {
   cursor: pointer;
 }
 
-.badges {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px 8px;
-}
-
-.badge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-}
-
-/* מדליה: עיגול עם עקבה. הושגה: מלאה בירוק. הבאה: טבעת התקדמות. עתידית: קו מקווקו */
-.medal {
-  width: 56px;
-  height: 56px;
-  flex: none;
-}
-
-.medal-track {
-  fill: none;
-  stroke: var(--line);
-  stroke-width: 2.5;
-  stroke-dasharray: 3 4;
-}
-
-.medal-progress {
-  fill: none;
-  stroke: var(--green-bright);
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 32px 32px;
-}
-
-.medal-face {
-  fill: var(--surface-2);
-}
-
-.medal-foot {
-  fill: var(--line-strong);
-}
-
-.medal.next .medal-track {
-  stroke-dasharray: none;
-  stroke: var(--green-soft);
-  stroke-width: 3.5;
-}
-
-.medal.next .medal-foot {
-  fill: var(--green);
-}
-
-.medal.got .medal-track {
-  stroke: var(--green-bright);
-  stroke-dasharray: none;
-  stroke-width: 2.5;
-}
-
-.medal.got .medal-face {
-  fill: var(--green);
-}
-
-.medal.got .medal-foot {
-  fill: var(--on-green);
-}
-
-.badge-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  line-height: 1.2;
-}
-
-.badge.got .badge-label,
-.badge.next .badge-label {
-  color: var(--green-deep);
-}
+/* אבני הדרך (רשת, מדליות ורמות): styles-v25.css */
 
 .actions-row .btn {
   flex: 1;
@@ -1790,9 +1711,6 @@ button.stat {
 }
 
 @media (max-width: 360px) {
-  .badges {
-    grid-template-columns: repeat(3, 1fr);
-  }
   .bottom-nav a {
     font-size: 12px;
   }

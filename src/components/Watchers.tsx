@@ -5,7 +5,7 @@ import { Sheet } from './Sheet';
 import { celebrate, toast } from '../lib/feedback';
 import { useNow } from '../lib/hooks';
 import { renderShareImage, shareImage } from '../lib/shareImage';
-import { cleanDaysWord, cleanPhrase, elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
+import { cleanDaysWord, cleanPhrase, elapsedMs, levelOf, milestoneLabel, milestonesOf, reachedMilestone } from '../lib/sobriety';
 import { setState, useAppState } from '../lib/store';
 import { APP_VERSION, releaseOf, releasesSince } from '../lib/version';
 
@@ -22,11 +22,16 @@ export function MilestoneWatcher() {
         setState((st) => ({ ...st, celebrated: { ...st.celebrated, [t.id]: reached } }));
         const label = milestoneLabel(reached);
         const named = t.name && t.name !== 'ההתמכרות שלי' ? ` מ${t.name}` : '';
+        // אבן הדרך הראשונה של רמה חדשה: אומרים את זה
+        const lv = levelOf(reached);
+        const newLevel = lv.level > 1 && milestonesOf(lv.level)[0]?.days === reached;
         const show = (blob: Blob | null) =>
           celebrate({
             size: 'big',
             title: `${cleanPhrase(label)}${named}!`,
-            text: 'צעד אחר צעד, יום אחר יום. זה שלך, וזה אמיתי. רק להיום.',
+            text: newLevel
+              ? `רמה חדשה באבני הדרך: ${lv.name}. צעד אחר צעד, יום אחר יום. רק להיום.`
+              : 'צעד אחר צעד, יום אחר יום. זה שלך, וזה אמיתי. רק להיום.',
             share: blob
               ? async () => {
                   const r = await shareImage(blob, `${cleanPhrase(label)}. רק להיום.`);

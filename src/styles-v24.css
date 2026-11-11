@@ -573,4 +573,5 @@ br + .small {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-height: var(--tap);
 }

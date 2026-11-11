@@ -25,32 +25,56 @@ export interface Tracker {
 
 export const DAY_MS = 86400000;
 
-export const MILESTONES: { days: number; label: string }[] = [
-  { days: 1, label: '24 שעות' },
+/** major: אבן דרך מרכזית (כוכב על המדליה) */
+export const MILESTONES: { days: number; label: string; major?: boolean }[] = [
+  { days: 1, label: '24 שעות', major: true },
   { days: 2, label: 'יומיים' },
   { days: 3, label: '3 ימים' },
   { days: 5, label: '5 ימים' },
-  { days: 7, label: 'שבוע' },
+  { days: 7, label: 'שבוע', major: true },
   { days: 10, label: '10 ימים' },
   { days: 14, label: 'שבועיים' },
   { days: 21, label: '3 שבועות' },
-  { days: 30, label: 'חודש' },
+  { days: 30, label: 'חודש', major: true },
   { days: 45, label: '45 יום' },
   { days: 60, label: 'חודשיים' },
-  { days: 90, label: '3 חודשים' },
+  { days: 90, label: '3 חודשים', major: true },
   { days: 120, label: '4 חודשים' },
   { days: 150, label: '5 חודשים' },
-  { days: 180, label: 'חצי שנה' },
+  { days: 180, label: 'חצי שנה', major: true },
   { days: 270, label: '9 חודשים' },
-  { days: 365, label: 'שנה' },
+  { days: 365, label: 'שנה', major: true },
   { days: 500, label: '500 יום' },
   { days: 730, label: 'שנתיים' },
   { days: 1000, label: '1,000 יום' },
   { days: 1095, label: '3 שנים' },
   { days: 1460, label: '4 שנים' },
-  { days: 1825, label: '5 שנים' },
-  { days: 3650, label: '10 שנים' },
+  { days: 1825, label: '5 שנים', major: true },
+  { days: 3650, label: '10 שנים', major: true },
 ];
+
+/**
+ * רמות של אבני הדרך, לפי חשיבות: כל רמה עם שם, צבע (lvl-N ב-styles-v25.css) וצורת מדליה משלה.
+ * upTo: אבן הדרך האחרונה ברמה (בימים).
+ */
+export const MILESTONE_LEVELS = [
+  { level: 1, name: 'הצעדים הראשונים', upTo: 10 },
+  { level: 2, name: 'מתחזקים', upTo: 60 },
+  { level: 3, name: 'דרך ארוכה', upTo: 270 },
+  { level: 4, name: 'שנים של חופש', upTo: Infinity },
+] as const;
+
+export type MilestoneLevel = (typeof MILESTONE_LEVELS)[number];
+
+/** הרמה של אבן דרך (לפי מספר הימים שלה) */
+export function levelOf(days: number): MilestoneLevel {
+  return MILESTONE_LEVELS.find((l) => days <= l.upTo) ?? MILESTONE_LEVELS[MILESTONE_LEVELS.length - 1];
+}
+
+/** אבני הדרך של כל רמה */
+export function milestonesOf(level: number) {
+  return MILESTONES.filter((m) => levelOf(m.days).level === level);
+}
 
 /** תגיות מוכנות לטריגרים */
 export const TRIGGERS = [

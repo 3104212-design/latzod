@@ -1,0 +1,291 @@
+/* ===== 2.5: אבני הדרך לפי רמות חשיבות =====
+   ארבע רמות, לכל אחת צבע וצורת מדליה (Medal.tsx): הצעדים הראשונים (ירוק, עיגול), מתחזקים (כחול, רוזטה),
+   דרך ארוכה (סגול, כוכב), שנים של חופש (זהב, שמש עם סרט). אבן דרך מרכזית מקבלת כוכב. */
+
+:root {
+  --gold: #c99512;
+  --gold-deep: #8c6810;
+  --gold-ink: #7d5a04;
+  --gold-soft: #fbf2da;
+  --star: #f2b705;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --gold: #b98a14;
+    --gold-deep: #8c6810;
+    --gold-ink: #f0cf73;
+    --gold-soft: #33290f;
+    --star: #f5c443;
+  }
+}
+
+:root[data-theme='dark'] {
+  --gold: #b98a14;
+  --gold-deep: #8c6810;
+  --gold-ink: #f0cf73;
+  --gold-soft: #33290f;
+  --star: #f5c443;
+}
+
+/* --lvl: הצבע המלא, --lvl-deep: פני המדליה, --cat: הכמוסה של הכרטיס */
+.lvl-1 {
+  --lvl: var(--c-green);
+  --lvl-deep: var(--green-deep);
+  --lvl-ink: var(--green-deep);
+  --lvl-soft: var(--green-soft);
+}
+
+.lvl-2 {
+  --lvl: var(--c-read);
+  --lvl-deep: #1d5d94;
+  --lvl-ink: var(--c-read-ink);
+  --lvl-soft: var(--c-read-soft);
+}
+
+.lvl-3 {
+  --lvl: var(--c-prayer);
+  --lvl-deep: #5a3fa3;
+  --lvl-ink: var(--c-prayer-ink);
+  --lvl-soft: var(--c-prayer-soft);
+}
+
+.lvl-4 {
+  /* טקסט לבן על הזהב הבהיר לא נקרא: הכמוסה בזהב הכהה */
+  --lvl-tag: var(--gold-deep);
+  --lvl: var(--gold);
+  --lvl-deep: var(--gold-deep);
+  --lvl-ink: var(--gold-ink);
+  --lvl-soft: var(--gold-soft);
+}
+
+.ms-level,
+.ms-row[class*='lvl-'] {
+  --cat: var(--lvl-tag, var(--lvl));
+  --cat-ink: var(--lvl-ink);
+  --cat-soft: var(--lvl-soft);
+}
+
+/* ---------- כרטיס רמה ---------- */
+.ms-level-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0 0 14px !important;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--lvl-ink);
+  text-align: center;
+}
+
+.ms-level.locked .ms-level-sub {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* רמה שהושלמה: רקע עדין בצבע הרמה */
+.ms-level.done {
+  background: linear-gradient(180deg, var(--lvl-soft), var(--surface) 70%);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 4px;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 74px;
+  text-align: center;
+}
+
+/* שורות מלאות בלי מדליה בודדת: 3 בשורה ברמה 1 (6), 5 ברמה 2 ו-3 (5 כל אחת), 4 ברמת השנים (8).
+   במסך צר או בטקסט גדול, הרוחב המינימלי שובר לשורות קצרות יותר */
+.ms-level.lvl-1 .badge {
+  width: max(70px, calc((100% - 8px) / 3));
+}
+
+.ms-level.lvl-2 .badge,
+.ms-level.lvl-3 .badge {
+  width: max(60px, calc((100% - 16px) / 5));
+}
+
+.ms-level.lvl-4 .badge {
+  width: max(74px, calc((100% - 12px) / 4));
+}
+
+.badge-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.badge.got .badge-label,
+.badge.next .badge-label {
+  color: var(--lvl-ink);
+}
+
+.badge.major .badge-label {
+  font-weight: 800;
+}
+
+/* ---------- המדליה ---------- */
+.medal {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  overflow: visible;
+}
+
+/* ככל שהרמה עולה, המדליה גדלה */
+.medal.l1 {
+  width: 52px;
+  height: 52px;
+}
+
+.medal.l3 {
+  width: 60px;
+  height: 60px;
+}
+
+.medal.l4 {
+  width: 64px;
+  height: 64px;
+}
+
+.medal-shape {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1.6;
+  stroke-dasharray: 3 3.5;
+  stroke-linejoin: round;
+}
+
+.medal-face {
+  fill: var(--surface);
+}
+
+.medal-foot {
+  fill: var(--line-strong);
+}
+
+.medal-ribbon {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.medal-progress {
+  fill: none;
+  stroke: var(--lvl);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 32px 32px;
+}
+
+.medal-star {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+/* הבאה בתור: צבע הרמה בעדינות, וטבעת התקדמות */
+.medal.next .medal-shape {
+  fill: var(--lvl-soft);
+  stroke: var(--lvl);
+  stroke-dasharray: none;
+  stroke-opacity: 0.5;
+}
+
+.medal.next .medal-foot {
+  fill: var(--lvl);
+}
+
+.medal.next .medal-ribbon {
+  fill: var(--lvl-soft);
+  stroke: var(--lvl);
+  stroke-opacity: 0.5;
+}
+
+.medal.next .medal-star {
+  fill: var(--lvl-soft);
+  stroke: var(--star);
+}
+
+/* הושגה: מלאה בצבע הרמה */
+.medal.got .medal-shape {
+  fill: var(--lvl);
+  stroke: var(--lvl-deep);
+  stroke-dasharray: none;
+  stroke-width: 1.2;
+}
+
+.medal.got .medal-face {
+  fill: var(--lvl-deep);
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1.2;
+}
+
+.medal.got .medal-foot {
+  fill: #fff;
+}
+
+.medal.got .medal-ribbon {
+  fill: var(--lvl-deep);
+  stroke: none;
+}
+
+.medal.got .medal-star {
+  fill: var(--star);
+  stroke: var(--surface);
+  stroke-width: 1.6;
+}
+
+/* ברמת השנים: ברק עדין על הזהב */
+.medal.l4.got .medal-shape {
+  filter: drop-shadow(0 2px 3px rgba(125, 90, 4, 0.35));
+}
+
+/* אבן הדרך האחרונה והבאה: המדליה בגודל אחיד */
+.ms-row .medal {
+  width: 60px;
+  height: 60px;
+}
+
+.ms-row .ms-body b {
+  color: var(--lvl-ink);
+}
+
+.ms-row .bar > span {
+  background: var(--lvl);
+}
+
+/* מדליה שהושגה עכשיו (במסך): נכנסת בעדינות */
+@media (prefers-reduced-motion: no-preference) {
+  .badge.next .medal-progress {
+    transition: stroke-dashoffset 0.6s ease;
+  }
+
+  [data-intro] .ms-level .badge.got .medal {
+    animation: medal-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) backwards;
+    animation-delay: 0.5s;
+  }
+}
+
+@keyframes medal-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
