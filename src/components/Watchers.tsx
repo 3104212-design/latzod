@@ -7,7 +7,7 @@ import { useNow } from '../lib/hooks';
 import { renderShareImage, shareImage } from '../lib/shareImage';
 import { cleanDaysWord, cleanPhrase, elapsedMs, milestoneLabel, reachedMilestone } from '../lib/sobriety';
 import { setState, useAppState } from '../lib/store';
-import { APP_VERSION, releaseOf, WHATS_NEW } from '../lib/version';
+import { APP_VERSION, releaseOf, releasesSince } from '../lib/version';
 
 /** בודק פעם בדקה אם ספירה הגיעה לאבן דרך חדשה, וחוגג פעם אחת */
 export function MilestoneWatcher() {
@@ -49,19 +49,24 @@ export function MilestoneWatcher() {
 export function WhatsNew() {
   const s = useAppState();
   if (!s.onboarded || releaseOf(s.seenVersion) === releaseOf(APP_VERSION)) return null;
+  const list = releasesSince(s.seenVersion);
   const close = () => setState((st) => ({ ...st, seenVersion: APP_VERSION }));
+  if (!list.length) return null;
   return (
-    <Sheet title={`מה חדש בגרסה ${releaseOf(APP_VERSION)}`} onClose={close}>
-      <div className="card">
-        <ul className="whats-new">
-          {WHATS_NEW.map((w) => (
-            <li key={w.title}>
-              <b>{w.title}</b>
-              <span>{w.text}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <Sheet title={list.length === 1 ? `מה חדש בגרסה ${list[0].release}` : 'מה חדש'} onClose={close}>
+      {list.map((r) => (
+        <div className="card" key={r.release}>
+          {list.length > 1 && <p className="card-label">גרסה {r.release}</p>}
+          <ul className="whats-new">
+            {r.items.map((w) => (
+              <li key={w.title}>
+                <b>{w.title}</b>
+                <span>{w.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
       <button className="btn btn-primary btn-block" onClick={close}>
         מעולה, ממשיכים
       </button>

@@ -1,11 +1,12 @@
-// עוד: הספר והאפליקציה, התקנה, תזכורות, המסלול, איש קשר, תצוגה, נעילה, תוכן וגיבוי.
+// עוד: הספר והאפליקציה, התקנה, הזמנת משתתפים, תזכורות, המסלול, איש קשר, תצוגה, נעילה, תוכן וגיבוי.
 
 import { useRef } from 'react';
 import { InstallCard } from '../components/Install';
+import { InviteCard } from '../components/Invite';
 import { LockSettings } from '../components/Lock';
 import { RemindersCard, TextSizePicker } from '../components/Reminders';
 import { toast } from '../lib/feedback';
-import { APP_VERSION } from '../lib/version';
+import { APP_VERSION, PREVIOUS_RELEASE } from '../lib/version';
 import { daysLabel } from '../lib/sobriety';
 import { TopBar } from '../components/Chrome';
 import { BookCredit, TitleBadge } from '../components/Brand';
@@ -96,13 +97,15 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
           </p>
           <div className="row about-row">
             <span className="pill">גרסה {APP_VERSION}</span>
-            <button className="btn btn-ghost" onClick={() => setState((st) => ({ ...st, seenVersion: undefined }))}>
+            <button className="btn btn-ghost" onClick={() => setState((st) => ({ ...st, seenVersion: PREVIOUS_RELEASE }))}>
               מה חדש
             </button>
           </div>
         </section>
 
         <InstallCard />
+
+        <InviteCard />
 
         <RemindersCard />
 

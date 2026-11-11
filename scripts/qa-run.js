@@ -83,6 +83,7 @@ const ROUTES = [
   { hash: '#/clean', click: '.stats > button:nth-child(1)' },
   { hash: '#/clean', click: '.stats > button:nth-child(2)' },
   { hash: '#/more', clickText: 'הגדרת קוד' },
+  { hash: '#/more', clickText: 'קוד QR' },
   { hash: '#/journal', search: 'בכנות' },
   { hash: '#/journal', click: '.week-open' },
   { hash: '#/', click: '.walk-cta' },
