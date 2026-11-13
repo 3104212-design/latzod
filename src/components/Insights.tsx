@@ -50,7 +50,8 @@ export function Insights() {
   }
   const partMax = Math.max(1, ...byPart);
 
-  const last14 = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13));
+  // מהיום אחורה: היום מימין למעלה, וכך הימים שמולאו מתחילים בראש הרשת ולא בסופה
+  const last14 = Array.from({ length: 14 }, (_, i) => addDays(today, -i));
   const recent = reviews.filter((r) => r.date > addDays(today, -7) && r.craving != null);
   const avgCraving = recent.length ? recent.reduce((a, r) => a + (r.craving ?? 0), 0) / recent.length : null;
 
@@ -81,8 +82,9 @@ export function Insights() {
               <a
                 key={d}
                 href={d === today ? '#/' : `#/day/${d}`}
-                className={`mood-cell m${r?.mood ?? 0}${r && !r.clean ? ' slip' : ''}`}
-                title={`${formatShort(d)}${m ? `: ${m.label}` : ''}`}
+                className={`mood-cell m${r?.mood ?? 0}${r && !r.clean ? ' slip' : ''}${d === today ? ' today' : ''}`}
+                title={`${d === today ? 'היום' : formatShort(d)}${m ? `: ${m.label}` : ''}`}
+                aria-label={`${d === today ? 'היום' : formatShort(d)}${m ? `: ${m.label}` : ': בלי סיכום'}`}
               >
                 <span aria-hidden="true">{m?.emoji ?? ''}</span>
               </a>

@@ -7,7 +7,7 @@ import { I } from '../components/Icons';
 import { Dial, Feet } from '../components/Visuals';
 import { Medal } from '../components/Medal';
 import { CardTag } from '../components/CardTag';
-import { formatLong, nowInputValue, toISO } from '../lib/dates';
+import { formatHebrew, formatLong, nowInputValue, toISO } from '../lib/dates';
 import { compressImage, useNow } from '../lib/hooks';
 import { celebrate, toast } from '../lib/feedback';
 import { renderShareImage, shareImage } from '../lib/shareImage';
@@ -186,7 +186,8 @@ function TrackerView({
 
   const reached = MILESTONES.filter((m) => days >= m.days);
   const last = reached[reached.length - 1];
-  const reachedOn = (d: number) => formatLong(toISO(new Date(parseLocal(t.since) + d * DAY_MS)));
+  const reachedDay = (d: number) => toISO(new Date(parseLocal(t.since) + d * DAY_MS));
+  const reachedOn = (d: number) => formatLong(reachedDay(d));
 
   return (
     <>
@@ -213,6 +214,7 @@ function TrackerView({
         </div>
         <div className="counter-since">
           מאז {dateOf(t.since)}, בשעה {timeOf(t.since)}
+          {formatHebrew(t.since.slice(0, 10)) && <span className="heb">{formatHebrew(t.since.slice(0, 10))}</span>}
         </div>
       </section>
 
@@ -223,7 +225,10 @@ function TrackerView({
             <span className="ms-body">
               <span className="ms-kicker">אבן הדרך האחרונה · {levelOf(last.days).name}</span>
               <b>{last.label}</b>
-              <span className="muted small">הושגה ב{reachedOn(last.days)}</span>
+              <span className="muted small">
+                הושגה ב{reachedOn(last.days)}
+                {formatHebrew(reachedDay(last.days)) && <span className="heb">{formatHebrew(reachedDay(last.days))}</span>}
+              </span>
             </span>
           </div>
         )}

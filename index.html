@@ -16,7 +16,7 @@
     <title>לצעוד לתוך היום</title>
   </head>
   <body>
-    <!-- מסך פתיחה: שתי עקבות נכנסות, עד שהאפליקציה עולה (App.tsx מסיר אותו). בלי סקריפט: CSP -->
+    <!-- מסך פתיחה: שתי עקבות שעושות שלוש פסיעות, עד שהאפליקציה עולה (App.tsx מסיר אותו בסוף הפסיעה השלישית). בלי סקריפט: CSP -->
     <div id="splash" aria-hidden="true">
       <svg viewBox="0 0 300 300" width="132" height="132">
         <g class="sp-l"><path transform="translate(40 92) rotate(-8) scale(.92)" d="M60 0C96 0 118 30 118 74c0 38-14 64-18 86H20C16 138 2 112 2 74 2 30 24 0 60 0Z" /><rect transform="translate(40 92) rotate(-8) scale(.92)" x="18" y="174" width="84" height="66" rx="26" /></g>
@@ -39,23 +39,52 @@
         opacity: 0;
         pointer-events: none;
       }
+      #splash svg {
+        overflow: visible;
+      }
       #splash g {
         fill: #fff;
         transform-box: fill-box;
         transform-origin: center;
-        animation: sp-step 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.3) backwards;
+      }
+      /* שלוש פסיעות: הימנית נוחתת מאחור, השמאלית נוחתת במקומה, והימנית עוברת קדימה למקומה */
+      #splash .sp-r {
+        animation: sp-walk 1.2s cubic-bezier(0.3, 0.7, 0.3, 1) 0.05s backwards;
       }
       #splash .sp-l {
         opacity: 0.6;
-        animation-delay: 0.05s;
-      }
-      #splash .sp-r {
-        animation-delay: 0.32s;
+        animation: sp-step 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) 0.4s backwards;
       }
       @keyframes sp-step {
         from {
           opacity: 0;
           transform: translateY(16px) scale(0.9);
+        }
+      }
+      @keyframes sp-walk {
+        0% {
+          opacity: 0;
+          transform: translateY(172px) scale(0.9);
+        }
+        25% {
+          opacity: 1;
+          transform: translateY(156px) scale(1);
+        }
+        64% {
+          opacity: 1;
+          transform: translateY(156px) scale(1);
+        }
+        78% {
+          opacity: 0.4;
+          transform: translateY(70px) scale(1.05);
+        }
+        91% {
+          opacity: 1;
+          transform: translateY(-3px) scale(0.97);
+        }
+        100% {
+          opacity: 1;
+          transform: none;
         }
       }
       @keyframes sp-hide {

@@ -1,0 +1,226 @@
+/* ===== 2.6: צעידה צבעונית, תאריך עברי בספירה, מצב הרוח מהיום אחורה ===== */
+
+/* ---------- הצעידה: כל צעד בצבע שלו ----------
+   המחלקה cat-<צעד> על .walk (DailyWalk.tsx) צובעת את הראש, את הרקע ואת הכפתור.
+   בהתחייבות ובסיום נשאר הירוק של הכריכה, בשאר הצעדים צבע המשנה שלהם */
+.walk {
+  --walk-hero: var(--cat);
+}
+
+.walk.cat-pledge,
+.walk.cat-flow {
+  --walk-hero: var(--hero);
+}
+
+.walk-top {
+  background-color: var(--walk-hero);
+  /* אור עדין למעלה וצל עדין למטה, מעל הצבע: הצבע לבדו מתחלף ברכות בין הצעדים */
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.14));
+  transition: background-color 0.5s ease;
+  z-index: 1;
+}
+
+/* רקע המסך: גוון רך של הצעד, שדוהה כלפי מטה */
+.walk::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 75%;
+  background-color: var(--cat-soft);
+  -webkit-mask-image: linear-gradient(180deg, #000 15%, transparent);
+  mask-image: linear-gradient(180deg, #000 15%, transparent);
+  transition: background-color 0.5s ease;
+  pointer-events: none;
+}
+
+.walk-body,
+.walk-actions {
+  position: relative;
+}
+
+/* השביל: העקבה הנוכחית לבנה ובולטת, עם נקודה בצבע של כל צעד מתחתיה */
+.walk-foot {
+  grid-template-rows: auto 7px;
+  gap: 3px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.walk-foot::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cat);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+  opacity: 0.75;
+}
+
+.walk-foot.done::after,
+.walk-foot.cur::after {
+  opacity: 1;
+}
+
+/* הנקודה של ההתחייבות: ירוק כהה, כדי שתיראה גם על הראש הירוק */
+.walk-trail .cat-pledge {
+  --cat: var(--green-deep);
+}
+
+.walk-foot svg {
+  height: 34px;
+}
+
+.walk-foot.done {
+  color: #fff;
+}
+
+.walk-foot.cur,
+.walk-foot.cur.done {
+  background: #fff;
+  color: var(--walk-hero);
+  box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.45);
+}
+
+/* החותמת בלי transform: העקבות ההפוכות (שמאל) נשארות הפוכות גם בזמן החותמת */
+@keyframes stamp {
+  0% {
+    scale: 1.7;
+    opacity: 0.4;
+  }
+  60% {
+    scale: 0.9;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* כמוסה מעל הכותרת: סמל ושם, בצבע הצעד (כמו הכותרות בכרטיסים) */
+.walk-stage:not(.walk-center) .walk-kicker.walk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: var(--cat);
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 8px 16px -10px var(--cat);
+}
+
+/* הכפתור הראשי בצבע הצעד */
+.walk .walk-next.btn-primary {
+  background: var(--cat);
+  color: #fff;
+  box-shadow: 0 10px 20px -12px var(--cat);
+}
+
+/* הקריאה: דף לבן על הרקע הצבעוני */
+.walk-stage .walk-reading {
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px;
+}
+
+.walk-stage .read-meta .page-chip {
+  background: var(--surface);
+}
+
+/* השאלון: תיבת כתיבה לבנה, ומסגרת בצבע הצעד כשכותבים */
+.walk .walk-textarea {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-color: color-mix(in srgb, var(--cat) 35%, var(--line));
+  border-radius: 18px;
+}
+
+.walk .walk-textarea:focus {
+  outline: none;
+  border-color: var(--cat);
+  box-shadow: 0 0 0 4px var(--cat-soft);
+}
+
+.walk .walk-dots i.filled {
+  background: var(--cat);
+  opacity: 0.45;
+}
+
+.walk .walk-dots i.on {
+  background: var(--cat);
+}
+
+.walk .walk-note {
+  background: var(--surface);
+  color: var(--cat-ink);
+}
+
+/* ההתחייבות והתפילה: הלוח זוהר מעט בצבע הצעד */
+.walk-panel {
+  box-shadow: var(--shadow-card), 0 22px 44px -28px var(--cat);
+}
+
+/* ---------- סיום הצעידה: כל עקבה בצבע של הצעד שלה ---------- */
+.walk-end-feet span.done {
+  color: var(--cat);
+}
+
+.walk-end.all .walk-end-feet {
+  gap: 6px;
+}
+
+.walk-end.all .walk-end-feet span {
+  width: 36px;
+  padding: 7px 0;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.walk-end.all .walk-end-feet span.done {
+  background: #fff;
+  color: var(--cat);
+  box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.45);
+}
+
+.walk-end.all .walk-end-feet svg {
+  width: 18px;
+  height: 38px;
+}
+
+/* העקבה בכפתור הצעידה, בצבע של הצעד הבא */
+.walk-cta-foot[class*='cat-'] {
+  color: var(--cat);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* העקבה הנוכחית "מחכה" לצעד: נעה מעט למעלה ולמטה */
+  .walk-foot.cur:not(.done) svg {
+    animation: foot-wait 1.8s ease-in-out infinite;
+  }
+
+  @keyframes foot-wait {
+    50% {
+      translate: 0 -3px;
+    }
+  }
+}
+
+/* ---------- הספירה: התאריך העברי ---------- */
+.counter-since .heb {
+  display: block;
+  margin-top: 2px;
+  font-size: 13.5px;
+  opacity: 0.88;
+}
+
+.ms-body .heb {
+  display: block;
+}
+
+/* ---------- יומן: מצב הרוח, היום מסומן (מימין למעלה) ---------- */
+.mood-cell.today {
+  border-color: var(--cat);
+  box-shadow: 0 0 0 1px var(--cat);
+}

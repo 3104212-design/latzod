@@ -5,6 +5,7 @@ import { LockGate } from './components/Lock';
 import { SosSheet } from './components/SosSheet';
 import { DocumentSync, MilestoneWatcher, WhatsNew } from './components/Watchers';
 import { todayISO } from './lib/dates';
+import { startIntro } from './lib/intro';
 import { replaceRoute, useRoute } from './lib/router';
 import { usePwa } from './lib/pwa';
 import { toast } from './lib/feedback';
@@ -37,14 +38,26 @@ export function App() {
   // פס המצב באייפון: מטופל בתגית apple-mobile-web-app-status-bar-style="default" ב-index.html,
   // שבה הטלפון מצייר פס אטום משלו. אין רצועה משלנו, כי היא הבהבה בגלילה.
   useEffect(() => {
-    // מסך הפתיחה (index.html) נעלם כשהאפליקציה עולה, אחרי ששתי העקבות הספיקו להיכנס
+    // מסך הפתיחה (index.html) נעלם כשהאפליקציה עולה וגם שלוש הפסיעות הסתיימו. אז מתחילה הפתיחה המונפשת
     const sp = document.getElementById('splash');
-    if (!sp) return;
-    const t1 = setTimeout(() => sp.classList.add('out'), Math.max(0, 850 - performance.now()));
-    const t2 = setTimeout(() => sp.remove(), Math.max(0, 850 - performance.now()) + 400);
+    if (!sp) return startIntro();
+    const walker = sp.querySelector('.sp-r');
+    const out = () => {
+      if (sp.classList.contains('out')) return;
+      sp.classList.add('out');
+      startIntro();
+      // בלי ניקוי: ב-StrictMode האפקט רץ פעמיים, והמסך חייב לרדת מהעמוד
+      setTimeout(() => sp.remove(), 400);
+    };
+    // בלי אנימציה (הפחתת תנועה, או שכבר הסתיימה): מיד
+    const walked = !walker?.getAnimations || walker.getAnimations().every((a) => a.playState === 'finished');
+    if (walked) out();
+    walker?.addEventListener('animationend', out);
+    // גיבוי, אם האירוע לא הגיע
+    const t = setTimeout(out, Math.max(0, 1800 - performance.now()));
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+      walker?.removeEventListener('animationend', out);
+      clearTimeout(t);
     };
   }, []);
   return (

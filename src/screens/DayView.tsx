@@ -328,7 +328,8 @@ function WalkCta({ rec, onOpen }: { rec: DayRecord; onOpen: () => void }) {
   return (
     <div>
       <button className="walk-cta" onClick={onOpen}>
-        <FootIcon className="walk-cta-foot" />
+        {/* העקבה בצבע של הצעד הבא */}
+        <FootIcon className={`walk-cta-foot cat-${FLOW[next].cat}`} />
         {label}
         {I.forward({ size: 18 })}
       </button>

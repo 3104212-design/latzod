@@ -1,7 +1,7 @@
 // הצעידה היומית: מסך מלא שמוביל צעד אחר צעד בעבודה של היום.
 // התחייבות, קריאה, שאלה אחת בכל פעם, תפילה וסיכום ערב, עם עקבות שמתמלאות בדרך.
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { EveningReview } from './EveningReview';
 import { Particles } from './Feedback';
@@ -24,6 +24,9 @@ function nextOpen(rec: DayRecord, from: number): number {
   for (let i = from + 1; i < END; i++) if (!st[i]) return i;
   return END;
 }
+
+/** סמל לכל צעד, בכמוסה שמעל הכותרת */
+const STAGE_ICON = [I.sun, I.book, I.pen, I.heart, I.moon];
 
 const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 
@@ -242,6 +245,7 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
 
     case 4:
       title = 'סיכום היום';
+      kicker = 'מבט אחורה על היום';
       main = (
         <>
           {!rec.review && !isEvening() && (
@@ -272,9 +276,11 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
   }
 
   const n = st.filter(Boolean).length;
+  // כל המסך מקבל את צבע הצעד: הראש, הרקע והכפתור. בהתחייבות ובסיום, הירוק
+  const cat = stage < END ? FLOW[stage].cat : 'flow';
 
   return createPortal(
-    <div className="walk" role="dialog" aria-modal="true" aria-label="הצעידה היומית">
+    <div className={`walk cat-${cat}`} role="dialog" aria-modal="true" aria-label="הצעידה היומית">
       <header className="walk-top">
         <div className="walk-bar">
           <button className="icon-btn" onClick={onClose} aria-label="סגירת הצעידה">
@@ -288,7 +294,7 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
         </div>
         <ol className="walk-trail">
           {FLOW.map((f, i) => (
-            <li key={f.id}>
+            <li key={f.id} className={`cat-${f.cat}`}>
               <button
                 type="button"
                 className={`walk-foot${st[i] ? ' done' : ''}${i === stage ? ' cur' : ''}${just === i ? ' just' : ''}${i % 2 ? ' alt' : ''}`}
@@ -308,7 +314,15 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
           className={`walk-stage${stage < END ? ` cat-${FLOW[stage].cat}` : ''}${panel ? ' walk-center' : ''}`}
           key={`${stage}-${q}`}
         >
-          {kicker && <p className="walk-kicker">{kicker}</p>}
+          {kicker &&
+            (panel ? (
+              <p className="walk-kicker">{kicker}</p>
+            ) : (
+              <p className="walk-kicker walk-chip">
+                {STAGE_ICON[stage]?.({ size: 16 })}
+                <span>{kicker}</span>
+              </p>
+            ))}
           {panel ? (
             <div className={`walk-panel cat cat-${FLOW[stage].cat}`}>
               <div className="card-tag-wrap">
@@ -338,7 +352,8 @@ export function DailyWalk({ date, onClose, onSos }: { date: ISODate; onClose: ()
             {I.back()}
           </button>
         )}
-        {actions}
+        {/* כפתור חדש בכל צעד: בלי מעבר צבע מהכפתור של הצעד הקודם (טקסט כהה על כחול, לרגע) */}
+        <Fragment key={stage}>{actions}</Fragment>
       </footer>
     </div>,
     document.body,
@@ -372,7 +387,7 @@ function WalkEnd({ st }: { st: boolean[] }) {
       {all && <Particles count={28} />}
       <div className="walk-end-feet" aria-hidden="true">
         {st.map((done, i) => (
-          <span key={i} className={done ? 'done' : ''} style={{ animationDelay: `${i * 120}ms` }}>
+          <span key={i} className={`cat-${FLOW[i].cat}${done ? ' done' : ''}`} style={{ animationDelay: `${i * 120}ms` }}>
             <FootIcon flip={i % 2 === 1} />
           </span>
         ))}

@@ -10,12 +10,13 @@ import './styles-v21.css';
 import './styles-v23.css';
 import './styles-v24.css';
 import './styles-v25.css';
+import './styles-v26.css';
 import { App } from './App';
+import { startIntro } from './lib/intro';
 import { registerServiceWorker } from './lib/pwa';
 
-// פתיחה מונפשת, פעם אחת בכל פתיחה של האפליקציה (styles-v24.css: [data-intro])
-document.documentElement.dataset.intro = '';
-setTimeout(() => delete document.documentElement.dataset.intro, 2600);
+// פתיחה מונפשת, פעם אחת בכל פתיחה. כשיש מסך פתיחה, היא מתחילה כשהוא נעלם (App.tsx)
+if (!document.getElementById('splash')) startIntro();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
