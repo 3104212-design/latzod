@@ -4,6 +4,7 @@ import type { Route } from '../lib/router';
 import type { ReactNode } from 'react';
 import { Icon } from './Visuals';
 import { TitleBadge, TitleMark } from './Brand';
+import { MotivationButton } from './Motivation';
 
 export function TopBar({ onHero, onSos }: { onHero?: boolean; onSos: () => void }) {
   return (
@@ -11,9 +12,12 @@ export function TopBar({ onHero, onSos }: { onHero?: boolean; onSos: () => void 
       <a href="#/" className="brand" aria-label="לצעוד לתוך היום, למסך הבית">
         {onHero ? <TitleMark height={104} /> : <TitleBadge height={54} />}
       </a>
-      <button className="sos-btn" onClick={onSos}>
-        עזרה עכשיו
-      </button>
+      <div className="topbar-actions">
+        <MotivationButton />
+        <button className="sos-btn" onClick={onSos}>
+          עזרה עכשיו
+        </button>
+      </div>
     </header>
   );
 }

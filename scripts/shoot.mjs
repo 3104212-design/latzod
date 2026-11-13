@@ -86,7 +86,11 @@ try {
       await evaluate(`(() => { const s = JSON.parse(localStorage.getItem('latzod.v1')); const d = new Date(); const t = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); const rec = s.days[t] ?? {}; s.days[t] = { ...rec, checkin: rec.checkin ?? d.toISOString(), read: true, note: rec.note || 'בדיקה', prayed: true, review: rec.review ?? { clean: true, mood: 4, craving: 2, triggers: [], at: d.toISOString() }, done: true, doneBy: 'flow' }; localStorage.setItem('latzod.v1', JSON.stringify(s)); location.hash = '#/walk'; })()`);
       await cdp('Page.reload');
       await sleep(1500);
-    } else if (action?.startsWith('walk:')) await evaluate(`document.querySelector('.walk-cta')?.click(); new Promise((r) => setTimeout(() => { document.querySelectorAll('.walk-foot')[${Number(action.slice(5))}]?.click(); r(); }, 300))`);
+    }
+    // חלון המוטיבציה, אחרי N לחיצות על "עוד משפט" (כל לחיצה: משפט ועיצוב אחרים)
+    else if (action?.startsWith('moti:'))
+      await evaluate(`document.querySelector('.moti-btn')?.click(); new Promise((r) => setTimeout(() => { for (let i = 0; i < ${Number(action.slice(5))}; i++) document.querySelector('.moti-next')?.click(); r(); }, 400))`);
+    else if (action?.startsWith('walk:')) await evaluate(`document.querySelector('.walk-cta')?.click(); new Promise((r) => setTimeout(() => { document.querySelectorAll('.walk-foot')[${Number(action.slice(5))}]?.click(); r(); }, 300))`);
     else if (action === 'bisect')
       console.log('bisect:', JSON.stringify(await evaluate(`(() => { const sels = ['.bottom-nav', '.topbar', '.hero', '.page-head', '.stack > *', '.toasts', '.stack']; const out = {}; for (const sel of sels) { const els = [...document.querySelectorAll(sel)]; els.forEach((e) => (e.style.display = 'none')); out[sel] = document.documentElement.scrollWidth; els.forEach((e) => (e.style.display = '')); } const kids = [...document.querySelectorAll('.stack > *')]; out.kids = kids.map((k, i) => { k.style.display = 'none'; const w = document.documentElement.scrollWidth; k.style.display = ''; return w < 356 ? i + ':' + k.className : null; }).filter(Boolean); return out; })()`)));
     else if (action?.startsWith('to:')) await evaluate(`document.querySelector(${JSON.stringify(action.slice(3))})?.scrollIntoView({ block: 'center' })`);

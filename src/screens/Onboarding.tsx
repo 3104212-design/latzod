@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { HEBREW_MONTHS, getStep } from '../content/steps';
+import { AddictionPicker } from '../components/AddictionPicker';
 import { Dial, Feet } from '../components/Visuals';
 import { PublisherLogo, TitleMark } from '../components/Brand';
 import { nowInputValue, todayISO } from '../lib/dates';
@@ -149,13 +150,7 @@ export function Onboarding() {
               {cleanSince && (
                 <div className="field">
                   <label htmlFor="onb-clean-name">ממה מתנקים? (לא חובה)</label>
-                  <input
-                    id="onb-clean-name"
-                    type="text"
-                    placeholder="למשל: אלכוהול, הימורים, עישון"
-                    value={cleanName}
-                    onChange={(e) => setCleanName(e.target.value)}
-                  />
+                  <AddictionPicker id="onb-clean-name" value={cleanName} onChange={setCleanName} />
                   <p className="muted small" style={{ marginTop: 6 }}>
                     בלשונית "ספירה" אפשר להוסיף עוד ספירות, ולראות כמה כסף וזמן נחסכו.
                   </p>

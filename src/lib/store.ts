@@ -186,8 +186,9 @@ export function saveTracker(t: Omit<Tracker, 'id' | 'history'> & Partial<Pick<Tr
   const id = t.id ?? uid();
   setState((s) => {
     const exists = s.trackers.some((x) => x.id === id);
-    const tracker: Tracker = { history: [], ...t, id };
     const before = s.trackers.find((x) => x.id === id);
+    // history: undefined מפורש (ספירה חדשה מהעורך) דרס את ברירת המחדל, ומסך הספירה קרס עד הפתיחה הבאה
+    const tracker: Tracker = { ...t, id, history: t.history ?? before?.history ?? [] };
     const celebrated = { ...s.celebrated };
     if (!before || before.since !== tracker.since) celebrated[id] = reachedMilestone(elapsedMs(tracker.since));
     return {

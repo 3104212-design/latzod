@@ -1,6 +1,7 @@
 // מסך הספירה: ימים נקיים, חיסכון, אבני דרך, רצפים, וסיבות אישיות לדרך.
 
 import { useEffect, useRef, useState } from 'react';
+import { AddictionPicker } from '../components/AddictionPicker';
 import { TopBar } from '../components/Chrome';
 import { ChipPicker, Sheet } from '../components/Sheet';
 import { I } from '../components/Icons';
@@ -38,7 +39,6 @@ import { addReason, removeReason, removeTracker, restartTracker, saveTracker, us
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const NAME_SUGGESTIONS = ['אלכוהול', 'סמים', 'הימורים', 'עישון', 'כדורים', 'מסכים', 'אוכל', 'קניות'];
 
 function timeOf(s: string) {
   const d = new Date(parseLocal(s));
@@ -481,14 +481,7 @@ function TrackerEditor({ tracker, onClose, onSaved }: { tracker?: Tracker; onClo
       <div className="card">
         <div className="field">
           <label htmlFor="tr-name">ממה מתנקים?</label>
-          <input id="tr-name" type="text" value={name} placeholder="ההתמכרות שלי" onChange={(e) => setName(e.target.value)} />
-          <div className="chips" style={{ marginTop: 8 }}>
-            {NAME_SUGGESTIONS.map((n) => (
-              <button key={n} type="button" className={`chip${name === n ? ' on' : ''}`} onClick={() => setName(n)}>
-                {n}
-              </button>
-            ))}
-          </div>
+          <AddictionPicker id="tr-name" value={name} onChange={setName} />
         </div>
         {needsMedicalNote(name) && (
           <p className="warn-note">

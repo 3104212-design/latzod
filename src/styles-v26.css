@@ -224,3 +224,429 @@
   border-color: var(--cat);
   box-shadow: 0 0 0 1px var(--cat);
 }
+
+/* ---------- 2.6: כפתור מוטיבציה ליד "עזרה עכשיו" ---------- */
+.topbar {
+  container: topbar / inline-size;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* במסך היום: הכפתור בעמודה הימנית שהייתה ריקה, מול "עזרה עכשיו" */
+.topbar.on-hero .topbar-actions {
+  display: contents;
+}
+
+.topbar.on-hero .moti-btn {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin-top: -2px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.topbar.on-hero .moti-btn svg {
+  color: #ffe08a;
+}
+
+.moti-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 6px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.moti-btn svg {
+  color: var(--star);
+  flex: none;
+}
+
+/* מסך צר או טקסט גדול: רק הסמל (התווית נשארת לקוראי מסך) */
+@container topbar (max-width: 328px) {
+  .topbar.on-hero .moti-btn span {
+    display: none;
+  }
+
+  .topbar.on-hero .moti-btn {
+    padding: 6px;
+  }
+}
+
+@container topbar (max-width: 309px) {
+  .topbar .moti-btn span {
+    display: none;
+  }
+
+  .topbar .moti-btn {
+    padding: 6px;
+  }
+}
+
+/* ---------- חלון המשפטים ---------- */
+.moti-stage {
+  display: grid;
+}
+
+.moti-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 320px;
+  margin: 0;
+  padding: 48px 26px 56px;
+  border-radius: 28px;
+  color: #fff;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  isolation: isolate;
+}
+
+.moti-text {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: 19ch;
+  font-family: var(--voice);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.45;
+  text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.moti-tag {
+  position: absolute;
+  top: 16px;
+  right: 50%;
+  translate: 50% 0;
+  z-index: 1;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.moti-foot {
+  position: absolute;
+  bottom: 16px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.moti-foot svg {
+  width: 9px;
+  height: 20px;
+}
+
+.moti-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.moti-next {
+  flex: 1;
+  /* במסך צר עם טקסט גדול: הכפתור מתכווץ (והטקסט נשבר), במקום שכפתור השיתוף ייצא מהמסך */
+  min-width: 0;
+  min-height: 54px;
+  padding-inline: 10px;
+  font-size: 17px;
+}
+
+.moti-side {
+  flex: none;
+  width: 54px;
+  min-height: 54px;
+  padding: 0;
+}
+
+/* העיצובים: הצבעים של שאר המערכת. צבע רקע מלא מתחת למעבר הצבע (גיבוי, וגם לבדיקת הניגודיות) */
+.moti-card.mv-0 {
+  background: var(--c-green) linear-gradient(160deg, var(--c-green), var(--c-questions));
+}
+
+.moti-card.mv-1 {
+  background: var(--c-read) linear-gradient(160deg, var(--c-read), #1d5d94);
+}
+
+.moti-card.mv-2 {
+  background: var(--c-prayer) linear-gradient(160deg, var(--c-prayer), #45357f);
+}
+
+.moti-card.mv-3 {
+  background: var(--c-review) linear-gradient(180deg, var(--c-challenge), var(--c-review));
+}
+
+.moti-card.mv-4 {
+  background: var(--surface);
+  border: 1px solid var(--card-line);
+  color: var(--green-deep);
+}
+
+.moti-card.mv-5 {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+
+.moti-card.mv-4 .moti-text,
+.moti-card.mv-5 .moti-text {
+  text-shadow: none;
+}
+
+.moti-card.mv-4 .moti-tag {
+  background: var(--green-soft);
+}
+
+.moti-card.mv-5 .moti-tag {
+  background: rgba(201, 149, 18, 0.16);
+}
+
+/* קישוטים */
+.d-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.d-sun {
+  position: absolute;
+  top: 26px;
+  left: 26px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #fff8d6, #ffd45c 70%);
+  box-shadow: 0 0 0 12px rgba(255, 224, 138, 0.18), 0 0 0 26px rgba(255, 224, 138, 0.09);
+}
+
+.d-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.d-bubble.b1 {
+  width: 150px;
+  height: 150px;
+  top: -40px;
+  left: -40px;
+}
+
+.d-bubble.b2 {
+  width: 80px;
+  height: 80px;
+  bottom: 30px;
+  right: -18px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.d-bubble.b3 {
+  width: 34px;
+  height: 34px;
+  bottom: 90px;
+  left: 34px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.d-moon {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  color: #ffe08a;
+  opacity: 0.9;
+}
+
+.d-star {
+  position: absolute;
+  color: #fff;
+  opacity: 0.7;
+}
+
+/* שמש שוקעת בפינה העליונה, מעודנת: לא מתחת לטקסט */
+.d-setting {
+  position: absolute;
+  top: 26px;
+  left: 22px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(180deg, rgba(255, 236, 170, 0.6) 0 9px, transparent 9px 14px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0 50%, transparent 85%);
+  mask-image: linear-gradient(180deg, #000 0 50%, transparent 85%);
+}
+
+.d-quote {
+  position: absolute;
+  top: -18px;
+  right: 18px;
+  font-family: var(--display);
+  font-size: 150px;
+  line-height: 1;
+  color: var(--green-soft);
+}
+
+.d-trail {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  color: var(--green);
+  opacity: 0.22;
+  rotate: -18deg;
+}
+
+.d-trail svg {
+  width: 11px;
+  height: 24px;
+}
+
+.d-trail svg:nth-child(2) {
+  margin-bottom: 8px;
+}
+
+.d-rays {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(from 0deg at 50% 100%, rgba(201, 149, 18, 0.13) 0deg 7deg, transparent 7deg 18deg);
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .moti-card {
+    animation: moti-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+  }
+
+  .d-star {
+    animation: twinkle 2.4s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+
+  .d-bubble {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .d-bubble.b2 {
+    animation-delay: -2s;
+  }
+
+  .d-bubble.b3 {
+    animation-delay: -4s;
+  }
+
+  .d-sun {
+    animation: glow 3.2s ease-in-out infinite;
+  }
+}
+
+@keyframes moti-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.97;
+  }
+}
+
+@keyframes twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes float {
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 0 16px rgba(255, 224, 138, 0.22), 0 0 0 32px rgba(255, 224, 138, 0.08);
+  }
+}
+
+/* ---------- 2.6: רשימה נפתחת ("ממה מתנקים?") ---------- */
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap::after {
+  /* חץ קטן משמאל */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  width: 8px;
+  height: 8px;
+  border-left: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  translate: 0 -70%;
+  rotate: -45deg;
+  pointer-events: none;
+}
+
+.select {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px 11px 40px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* לפני שבוחרים: "בחירה מהרשימה" באפור */
+.select.empty {
+  color: var(--muted);
+}
+
+.select option {
+  color: var(--text);
+}
+
+.select-other {
+  margin-top: 8px;
+}
+
+.moti-card.mv-4 .moti-foot,
+.moti-card.mv-5 .moti-foot {
+  text-shadow: none;
+}
