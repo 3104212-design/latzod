@@ -37,7 +37,7 @@ export function seed({ onboarded = true } = {}) {
       done: i % 3 !== 0,
       answers: i % 2 ? ['ענייתי בכנות על השאלה הזו, והרגשתי הקלה גדולה אחרי השיחה עם הספונסר.', '', 'עוד תשובה'] : [],
       note: i === 4 ? 'יום קשה בעבודה, אבל עברתי אותו.' : undefined,
-      review: i > 0 ? { clean: i !== 6, mood: (i % 5) + 1, craving: i % 10, triggers: i % 2 ? ['לחץ', 'עייפות'] : ['בדידות'], at: back(i).toISOString() } : undefined,
+      review: i > 0 ? { clean: i !== 6, mood: (i % 5) + 1, craving: i % 10, triggers: i % 2 ? ['לחץ', 'עייפות'] : ['בדידות'], connection: i % 3 === 0 ? ['ספונסר', 'משפחה'] : i % 3 === 1 ? ['קבוצה או פגישה'] : i < 9 ? [] : undefined, at: back(i).toISOString() } : undefined,
     };
   }
   const st = {

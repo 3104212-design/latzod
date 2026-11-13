@@ -51,6 +51,20 @@ export function Insights() {
   const partMax = Math.max(1, ...byPart);
 
   // מהיום אחורה: היום מימין למעלה, וכך הימים שמולאו מתחילים בראש הרשת ולא בסופה
+  // קשר ודחף, בחודש האחרון: רק ימים שבהם נשאלה (ונענתה) שאלת הקשר
+  const month = reviews.filter((r) => r.date > addDays(today, -30) && r.connection !== undefined);
+  const withC = month.filter((r) => r.connection!.length > 0);
+  const without = month.filter((r) => r.connection!.length === 0);
+  const avg = (xs: typeof month) => {
+    const v = xs.filter((r) => r.craving != null);
+    return v.length >= 2 ? v.reduce((a, r) => a + (r.craving ?? 0), 0) / v.length : null;
+  };
+  const avgWith = avg(withC);
+  const avgWithout = avg(without);
+  const people = new Map<string, number>();
+  for (const r of withC) for (const c of r.connection!) people.set(c, (people.get(c) ?? 0) + 1);
+  const topPeople = [...people.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+
   const last14 = Array.from({ length: 14 }, (_, i) => addDays(today, -i));
   const recent = reviews.filter((r) => r.date > addDays(today, -7) && r.craving != null);
   const avgCraving = recent.length ? recent.reduce((a, r) => a + (r.craving ?? 0), 0) / recent.length : null;
@@ -97,6 +111,49 @@ export function Insights() {
             : 'מילוי "סיכום היום" בכל ערב יציג כאן את התמונה לאורך זמן.'}
         </p>
       </div>
+
+      {month.length > 0 && (
+        <div className="card cat-read connect-card">
+          <p className="card-label">קשר ודחף</p>
+          <p className="connect-count">
+            <b>{withC.length}</b> {withC.length === 1 ? 'יום' : 'ימים'} עם קשר אמיתי
+            <span className="muted"> · מתוך {month.length === 1 ? 'יום אחד' : `${month.length} ימים`} שבהם עניתי בחודש האחרון</span>
+          </p>
+          {avgWith != null && avgWithout != null && (
+            <>
+              <div className="hbars">
+                <div className="hbar">
+                  <span>עם קשר</span>
+                  <div className="bar">
+                    <span style={{ width: `${(avgWith / 10) * 100}%` }} />
+                  </div>
+                  <b>{avgWith.toFixed(1)}</b>
+                </div>
+                <div className="hbar">
+                  <span>בלי קשר</span>
+                  <div className="bar">
+                    <span style={{ width: `${(avgWithout / 10) * 100}%` }} />
+                  </div>
+                  <b>{avgWithout.toFixed(1)}</b>
+                </div>
+              </div>
+              <p className="muted small" style={{ marginTop: 8 }}>
+                עוצמת הדחף הממוצעת (מתוך 10).{' '}
+                {avgWith < avgWithout - 0.4
+                  ? 'בימים עם קשר הדחף היה חלש יותר. כדאי לזכור את זה ביום קשה.'
+                  : avgWith > avgWithout + 0.4
+                    ? 'הפעם הדחף לא היה חלש יותר בימים עם קשר. שווה להמשיך לשים לב.'
+                    : 'בינתיים אין הבדל ברור. התמונה תתבהר עם הזמן.'}
+              </p>
+            </>
+          )}
+          {topPeople.length > 0 && (
+            <p className="muted small" style={{ marginTop: 6 }}>
+              הכי הרבה: {topPeople.map(([p, n]) => `${p} (${n})`).join(', ')}.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="card cat-questions">
         <p className="card-label">מה מפעיל אותי</p>

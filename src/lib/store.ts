@@ -35,6 +35,8 @@ export interface DayReview {
   /** עוצמת הדחף 0 עד 10 */
   craving?: number;
   triggers: string[];
+  /** עם מי היה קשר אמיתי (נשאל רק בחלק מהימים). [] = אף אחד, undefined = לא נשאל או לא נענה */
+  connection?: string[];
   at: string;
 }
 

@@ -74,9 +74,13 @@ try {
   await cdp('Page.reload');
   await sleep(1500);
   for (const [i, r] of routes.entries()) {
-    const [hash, action] = r.split('|');
+    const [hash, actions] = r.split('|');
     await cdp('Page.navigate', { url: `${base}/${hash}` });
     await sleep(1400);
+    // כמה פעולות ברצף עם ">>", למשל: ".review .btn-ghost>>to:.connect-field"
+    const steps = (actions ?? '').split('>>').filter(Boolean);
+    for (const [si, action] of steps.entries()) {
+    if (si > 0) await sleep(600);
     if (action === 'walk') await evaluate(`document.querySelector('.walk-cta')?.click()`);
     // מסך הסיום של הצעידה: "לסיים לעכשיו" מסיכום הערב (חלקי)
     else if (action === 'walk:end')
@@ -97,6 +101,8 @@ try {
     else if (action === 'scroll') await evaluate(`window.scrollTo(0, document.body.scrollHeight / 2)`);
     else if (action === 'bottom') await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
     else if (action) await evaluate(`document.querySelector(${JSON.stringify(action)})?.click()`);
+    }
+    const action = actions;
     await sleep(action ? 900 : 300);
     const shot = await cdp('Page.captureScreenshot', { format: 'png' });
     const name = `${String(i + 1).padStart(2, '0')}-${(hash + (action ? '-' + action : '')).replace(/[^a-z0-9]+/gi, '_')}${dark ? '-dark' : ''}.png`;

@@ -6,7 +6,7 @@ import { Scale } from './Scale';
 import { CardTag } from './CardTag';
 import { I } from './Icons';
 import type { ISODate } from '../lib/dates';
-import { MOODS, TRIGGERS } from '../lib/sobriety';
+import { CONNECTIONS, MOODS, TRIGGERS, asksConnection } from '../lib/sobriety';
 import { haptic } from '../lib/feedback';
 import { updateDay, useAppState, type DayReview } from '../lib/store';
 
@@ -18,10 +18,14 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
   const [mood, setMood] = useState<number | undefined>(saved?.mood);
   const [craving, setCraving] = useState<number>(saved?.craving ?? 0);
   const [triggers, setTriggers] = useState<string[]>(saved?.triggers ?? []);
+  const [connection, setConnection] = useState<string[] | undefined>(saved?.connection);
+  // במידה: רק בחלק מהערבים (או כשכבר נענתה ביום הזה)
+  const askConnection = asksConnection(date) || saved?.connection !== undefined;
 
   const save = () => {
     if (clean === undefined) return;
     const review: DayReview = { clean, mood, craving, triggers, at: new Date().toISOString() };
+    if (askConnection && connection !== undefined) review.connection = connection;
     if (onSaved) onSaved(review);
     else updateDay(date, (d) => ({ ...d, review }));
     haptic(12);
@@ -51,6 +55,11 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
               {t}
             </span>
           ))}
+          {saved.connection && saved.connection.length > 0 && (
+            <span className="pill pill-connect">
+              {I.users({ size: 15 })} קשר: {saved.connection.join(', ')}
+            </span>
+          )}
         </div>
         {!saved.clean && (
           <p className="small" style={{ marginTop: 10 }}>
@@ -113,6 +122,41 @@ export function EveningReview({ date, onSaved }: { date: ISODate; onSaved?: (r: 
         <label>מה הפעיל אותי היום? (לא חובה)</label>
         <ChipPicker options={TRIGGERS} value={triggers} onChange={setTriggers} />
       </div>
+
+      {askConnection && (
+        <div className="field connect-field">
+          <label>עם מי הייתי בקשר אמיתי היום? (לא חובה)</label>
+          <p className="muted small">שיחה, מפגש או הודעה כנה. אנחנו לא הולכים את הדרך לבד.</p>
+          <div className="chips">
+            {CONNECTIONS.map((c) => {
+              const on = !!connection?.includes(c);
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  className={`chip${on ? ' on' : ''}`}
+                  aria-pressed={on}
+                  onClick={() => {
+                    const next = on ? connection!.filter((x) => x !== c) : [...(connection ?? []), c];
+                    // ביטול האחרון: חוזרים ל"לא ענו", לא ל"אף אחד היום"
+                    setConnection(next.length ? next : undefined);
+                  }}
+                >
+                  {c}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className={`chip chip-none${connection?.length === 0 ? ' on' : ''}`}
+              aria-pressed={connection?.length === 0}
+              onClick={() => setConnection(connection?.length === 0 ? undefined : [])}
+            >
+              אף אחד היום
+            </button>
+          </div>
+        </div>
+      )}
 
       <button className="btn btn-primary btn-block" disabled={clean === undefined} onClick={save}>
         שמירת הסיכום

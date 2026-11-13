@@ -650,3 +650,28 @@
 .moti-card.mv-5 .moti-foot {
   text-shadow: none;
 }
+
+/* ---------- 2.8: קשר (סיכום הערב והיומן) ---------- */
+/* "אף אחד היום": מסגרת מקווקוות, כדי שייראה כבחירה אחרת ולא כעוד אדם */
+.chip.chip-none:not(.on) {
+  border-style: dashed;
+}
+
+.pill.pill-connect {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.connect-count {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.connect-count b {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--cat-ink);
+}

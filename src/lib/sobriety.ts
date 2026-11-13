@@ -76,6 +76,15 @@ export function milestonesOf(level: number) {
   return MILESTONES.filter((m) => levelOf(m.days).level === level);
 }
 
+/** עם מי היה קשר אמיתי היום (סיכום הערב). "אף אחד" נשמר כרשימה ריקה */
+export const CONNECTIONS = ['ספונסר', 'קבוצה או פגישה', 'משפחה', 'חברים', 'מישהו מהדרך', 'איש או אשת מקצוע'];
+
+/** שאלת הקשר נשאלת במידה, לא בכל ערב: ראשון, שלישי וחמישי */
+export function asksConnection(date: string): boolean {
+  const [y, m, d] = date.split('-').map(Number);
+  return [0, 2, 4].includes(new Date(y, m - 1, d).getDay());
+}
+
 /** תגיות מוכנות לטריגרים */
 export const TRIGGERS = [
   'לחץ',
