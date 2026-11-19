@@ -675,3 +675,33 @@
   font-size: 22px;
   color: var(--cat-ink);
 }
+
+/* ---------- 2.8.1: רשת ביטחון כשמסך נופל ---------- */
+.oops {
+  padding: 24px 16px;
+}
+
+.oops-full {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.oops-card {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.oops-card h1 {
+  margin: 0 0 8px;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.oops-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0 6px;
+}

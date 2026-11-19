@@ -1,7 +1,7 @@
 // שחזור מגיבוי: משותף למסך "עוד" ולמסך הכניסה (מי שעובר לטלפון חדש נכנס עם הגיבוי שלו).
 
 import { daysLabel } from './sobriety';
-import { normalize, readJSONFile, setState, type AppState } from './store';
+import { getState, normalize, readJSONFile, setState, type AppState } from './store';
 
 /** קובץ שנראה כמו גיבוי של האפליקציה (ולא קובץ תוכן או JSON אחר) */
 export function isBackup(raw: unknown): raw is Partial<AppState> {
@@ -27,8 +27,21 @@ export async function restoreBackupFile(f: File): Promise<RestoreResult> {
   const counters = data.trackers.length;
   const what = `בגיבוי: ${daysLabel(days)} ביומן${counters ? `, ${counters === 1 ? 'ספירה אחת' : `${counters} ספירות`}` : ''}.`;
   if (!confirm(`${what}\n\nהגיבוי יחליף את כל הנתונים שבמכשיר עכשיו. להמשיך?`)) return 'cancelled';
-  setState({ ...data, onboarded: true });
+  applyRestore(data);
   return 'restored';
+}
+
+/** מחליף את הנתונים בנתונים מהגיבוי, ומשאיר את מה ששייך למכשיר: מצב המנהל וההזמנה.
+ *  בלי זה, גיבוי ישן (או מטלפון אחר) היה מוחק את ניהול ההזמנות בטלפון של הבעלים */
+export function applyRestore(data: AppState) {
+  const cur = getState();
+  setState({ ...data, onboarded: true, admin: cur.admin ?? data.admin, access: cur.access ?? data.access });
+}
+
+/** מה שנכנס לקובץ הגיבוי: כל הנתונים, בלי מפתח המנהל (מי שמקבל את הקובץ לא יוכל לנהל איתו הזמנות) */
+export function backupData(s: AppState): Omit<AppState, 'admin'> {
+  const { admin: _admin, ...rest } = s;
+  return rest;
 }
 
 export const RESTORE_MESSAGES: Record<Exclude<RestoreResult, 'cancelled'>, string> = {

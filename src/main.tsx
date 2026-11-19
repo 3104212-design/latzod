@@ -12,6 +12,7 @@ import './styles-v24.css';
 import './styles-v25.css';
 import './styles-v26.css';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { startIntro } from './lib/intro';
 import { registerServiceWorker } from './lib/pwa';
 
@@ -20,7 +21,9 @@ if (!document.getElementById('splash')) startIntro();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary full>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
 

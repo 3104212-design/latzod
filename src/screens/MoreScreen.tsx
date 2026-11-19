@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { I } from '../components/Icons';
 import { InstallCard } from '../components/Install';
 import { AdminPairSheet, InviteAdminCard } from '../components/Invite';
-import { isBackup, RESTORE_MESSAGES, restoreBackupFile } from '../lib/backup';
+import { backupData, isBackup, RESTORE_MESSAGES, restoreBackupFile } from '../lib/backup';
 import { LockSettings } from '../components/Lock';
 import { RemindersCard, TextSizePicker } from '../components/Reminders';
 import { toast } from '../lib/feedback';
@@ -42,7 +42,7 @@ export function MoreScreen({ onSos }: { onSos: () => void }) {
   };
 
   const saveBackup = async () => {
-    const r = await downloadJSON(`latzod-backup-${todayISO()}.json`, s);
+    const r = await downloadJSON(`latzod-backup-${todayISO()}.json`, backupData(s));
     if (r !== 'cancelled') flash(r === 'shared' ? 'הגיבוי מוכן. כדאי לשמור אותו ב"קבצים" או בענן.' : 'הגיבוי נשמר בתיקיית ההורדות.');
   };
 

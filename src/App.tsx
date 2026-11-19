@@ -3,6 +3,7 @@ import { BottomNav } from './components/Chrome';
 import { CelebrationLayer, Toasts } from './components/Feedback';
 import { LockGate } from './components/Lock';
 import { SosSheet } from './components/SosSheet';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { DocumentSync, MilestoneWatcher, WhatsNew } from './components/Watchers';
 import { todayISO } from './lib/dates';
 import { startIntro } from './lib/intro';
@@ -136,10 +137,14 @@ function Shell() {
         דילוג לתוכן
       </a>
       <main id="main" key={key} className="route">
-        {screen}
+        <ErrorBoundary>{screen}</ErrorBoundary>
       </main>
       <BottomNav route={route} />
-      {sos && <SosSheet onClose={closeSos} />}
+      {sos && (
+        <ErrorBoundary>
+          <SosSheet onClose={closeSos} />
+        </ErrorBoundary>
+      )}
       <MilestoneWatcher />
       <WhatsNew />
     </div>

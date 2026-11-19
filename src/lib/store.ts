@@ -94,13 +94,16 @@ export interface AppState {
   /** כניסה עם הזמנה חד פעמית: הקוד ומפתח המושב (למקרה של כניסה נוספת של אותו אדם) */
   access?: { code: string; seat: string; at: string; tipDone?: boolean };
   /** מצב מנהל: רק בטלפון של בעל האפליקציה. ready: הזמנה מוכנה לשליחה (כדי שהשיתוף ייפתח ישר מהלחיצה) */
-  admin?: { token: string; ready?: string };
+  /** sending: ההזמנה שתפריט השיתוף שלה נפתח (אם האפליקציה נטענת מחדש באמצע, היא נחשבת כנשלחה) */
+  admin?: { token: string; ready?: string; sending?: string; sendingNote?: string };
   days: Record<ISODate, DayRecord>;
   /** תוכן יומי שהוזן במצב עריכה. מפתח: "<צעד>-<יום>" */
   content: Record<string, DayContent>;
 }
 
 const KEY = 'latzod.v1';
+/** מפתח האחסון, לרשת הביטחון (שומרת גיבוי ישר מהאחסון) */
+export const STORAGE_KEY = KEY;
 
 export const DEFAULT_STATE: AppState = {
   version: 1,

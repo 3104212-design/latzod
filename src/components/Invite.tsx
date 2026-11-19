@@ -2,7 +2,7 @@
 // הזמנה אחת תמיד מוכנה מראש, כדי שתפריט השיתוף ייפתח ישר מהלחיצה (אייפון דורש זאת).
 // כל הזמנה פותחת את האפליקציה פעם אחת, לאדם אחד. שום נתון מתוך האפליקציה לא נשלח עם ההזמנה.
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import qrcode from 'qrcode-generator';
 import { I } from './Icons';
 import { Sheet } from './Sheet';
@@ -19,7 +19,7 @@ import {
   revokeInvite,
   type Invite,
 } from '../lib/invites';
-import { setState, useAppState } from '../lib/store';
+import { getState, setState, useAppState } from '../lib/store';
 
 /** נוסח ההזמנה: רק על האפליקציה, בלי לחשוף משהו על מי ששולח */
 export const INVITE_TEXT =
@@ -60,10 +60,20 @@ export function InviteAdminCard() {
   const [list, setList] = useState<Invite[] | null>(null);
   const [qr, setQr] = useState<string | null>(null);
 
+  /** הכנת הזמנה חדשה (מוגדרת למטה), כדי ש-refresh יוכל לקרוא לה */
+  const prepareRef = useRef<() => void>(() => undefined);
   const refresh = useCallback(async () => {
     const r = await listInvites();
-    if (r.ok) setList(r.data.invites);
-    else if (r.error === 'not-admin') {
+    if (r.ok) {
+      setList(r.data.invites);
+      // ההזמנה ה"מוכנה" כבר נוצלה, בוטלה או נשלחה (למשל במכשיר אחר): לא מציעים אותה שוב, מכינים חדשה
+      const ready = getState().admin?.ready;
+      const gone = ready && r.data.invites.find((x) => x.code === ready && (x.usedAt || x.revoked || x.givenAt));
+      if (gone) {
+        setState((x) => ({ ...x, admin: x.admin && { ...x.admin, ready: undefined, sending: undefined, sendingNote: undefined } }));
+        prepareRef.current();
+      }
+    } else if (r.error === 'not-admin') {
       toast(INVITE_ERRORS['not-admin']);
       leaveAdmin();
     }
@@ -78,29 +88,40 @@ export function InviteAdminCard() {
     else if (r.error !== 'network') toast(INVITE_ERRORS[r.error]);
   }, []);
 
-  useEffect(() => {
-    refresh();
-    if (!ready) prepare();
-  }, []);
+  prepareRef.current = prepare;
 
   /** ההזמנה המוכנה יצאה לדרך: נרשמת בשרת כ"נשלחה", ומכינים חדשה */
-  const given = (code: string) => {
-    setState((x) => ({ ...x, admin: x.admin && { ...x.admin, ready: undefined } }));
-    const n = note.trim() || undefined;
+  const given = (code: string, n: string | undefined = note.trim() || undefined) => {
+    setState((x) => ({ ...x, admin: x.admin && { ...x.admin, ready: undefined, sending: undefined, sendingNote: undefined } }));
     setNote('');
     markGiven(code, n).then(refresh);
     prepare();
   };
 
+  useEffect(() => {
+    const a = getState().admin;
+    // באייפון האפליקציה נטענת לפעמים מחדש בזמן המעבר לוואטסאפ, לפני שהשיתוף "הסתיים".
+    // ההזמנה כבר יצאה, ולכן היא נרשמת כנשלחה ולא מוצעת שוב (אחרת אדם שני היה מקבל "כבר נוצלה")
+    if (a?.ready && a.sending === a.ready) given(a.ready, a.sendingNote);
+    else {
+      refresh();
+      if (!ready) prepare();
+    }
+  }, []);
+
   const send = async () => {
     if (!ready) return;
     const link = inviteLink(ready);
     if (navigator.share) {
+      const n = note.trim() || undefined;
+      setState((x) => ({ ...x, admin: x.admin && { ...x.admin, sending: ready, sendingNote: n } }));
       try {
         await navigator.share({ title: 'לצעוד לתוך היום', text: INVITE_TEXT, url: link });
-        given(ready);
+        given(ready, n);
         return;
       } catch (e) {
+        // השיתוף בוטל: ההזמנה נשארת מוכנה, ולא נחשבת כנשלחה
+        setState((x) => ({ ...x, admin: x.admin && { ...x.admin, sending: undefined, sendingNote: undefined } }));
         if ((e as Error).name === 'AbortError') return;
       }
     }
